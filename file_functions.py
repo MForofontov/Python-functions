@@ -1,5 +1,7 @@
 import os
+import shutil
 import pandas as pd
+from itertools import zip_longest
 
 def create_directory(dir:str):
     """
@@ -37,6 +39,10 @@ def check_and_delete_file(file:str):
     if os.path.isfile(file):
         os.remove(file)
 
+def copy_file(source_file, destination_file):
+    # Copy the file to the destination directory
+    shutil.copy(source_file, destination_file)
+
 def import_df_from_file(file_path, sep):
     df = pd.read_csv(file_path, sep=sep)
 
@@ -73,3 +79,28 @@ def get_file_paths_dict(directory):
             file_paths_dict[filename] = file_path
     
     return file_paths_dict
+
+def write_dict_to_tsv(file_path, data):
+    """
+    Write a dictionary to a TSV (Tab-Separated Values) file.
+    
+    Parameters
+    ----------
+    file_path : str
+        The file path to save the TSV file.
+    data : dict 
+        The dictionary where keys are column names and values are lists of values for each column.
+    
+    Returns
+    -------
+    return : No return
+        Write dict to file.
+    """
+    with open(file_path, 'w') as f:
+        # Write headers
+        f.write('\t'.join(data.keys()) + '\n')
+
+        # Write data
+        for row in zip_longest(*data.values(), fillvalue=''):
+            row_str = '\t'.join(map(str, row))
+            f.write(row_str + '\n')
