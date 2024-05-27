@@ -354,6 +354,7 @@ def translate_seq_deduplicate(seq_dict, path_to_write, untras_path, min_len, cou
                     protein_hashes[prot_hash].append(id_s)
             else:
                 translation_dict[id_s] = protein_translation
+                translation.write(f'>{id_s}\n{protein_translation}\n')
     if untras_seq and untras_path:
         with open(untras_path, 'w+') as untras_file:
             for id_s, exceptions in untras_seq.items():
@@ -386,5 +387,18 @@ def fetch_fasta_dict(file_path, count_seq):
             print(f"\rProcessed {i} CDS", end='', flush=True)
             i += 1
         fasta_dict[rec.id] = rec.seq
+
+    return fasta_dict
+
+def deduplicate_fasta_dict(fasta_dict):
+    deduplicated_list = []
+    for key, sequence in fasta_dict.items():
+        # Create a hash of the sequence
+        sequence_hash = hashlib.sha256(sequence.encode('utf-8')).hexdigest()
+        # If the hash is not already a key in the deduplicated_dict, add the sequence
+        if sequence_hash not in deduplicated_list:
+            deduplicated_list.append(sequence_hash)
+        else:
+            del fasta_dict[key]
 
     return fasta_dict
