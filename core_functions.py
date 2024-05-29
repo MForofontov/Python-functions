@@ -23,7 +23,7 @@ except ModuleNotFoundError:
                                       graphical_functions as gf,
                                       pandas_functions as pf)
 
-def alignment_dict_to_file(blast_results_dict, file_path, write_type, add_groups_ids = False):
+def alignment_dict_to_file(blast_results_dict, file_path, write_type, add_group_column = False):
     """
     Writes alignments strings to file.
 
@@ -35,7 +35,7 @@ def alignment_dict_to_file(blast_results_dict, file_path, write_type, add_groups
         File path to create to write the file
     write_type : str
         If to create new file and write or to append to existing file
-    add_groups_ids : bool, optional
+    add_group_column : bool, optional
         If to add to the header the CDS_group column.
 
     Returns
@@ -67,7 +67,7 @@ def alignment_dict_to_file(blast_results_dict, file_path, write_type, add_groups
               'Palign_local_min\t',
               'Class\n']
 
-    if add_groups_ids:
+    if add_group_column:
         header[-1] = 'CDS_group\t'
         header.append('Class\n')
 
@@ -85,7 +85,7 @@ def alignment_dict_to_file(blast_results_dict, file_path, write_type, add_groups
 def add_items_to_results(representative_blast_results, reps_kmers_sim, bsr_values,
                          representative_blast_results_coords_all,
                          representative_blast_results_coords_pident,
-                         frequency_cds_cluster, loci_ids, add_groups_ids = None):
+                         frequency_in_genomes, loci_ids, add_groups_ids = None):
     """
     Function to add to BLAST results additional information, it adds:
     bsr: value between the two CDS.
@@ -113,12 +113,15 @@ def add_items_to_results(representative_blast_results, reps_kmers_sim, bsr_value
         Dict that contain the coords for all of the entries.
     representative_blast_results_coords_pident : dict
         Dict that contain the coords for all of the entries above certain pident value.
-    frequency_cds_cluster : dict
+    frequency_in_genomes : dict
         Dict that contains sum of frequency of that representatives cluster in the
         genomes of the schema.
     loci_ids : bool
-        If IDs of loci representatives are included in the frequency_cds_cluster
+        If IDs of loci representatives are included in the frequency_in_genomes
         they are in this format loci1_x.
+    add_groups_ids : Dict, optional
+        Dict that contains the IDs of the joined groups to add to the results while the values are group
+        members.
 
     Returns
     -------
@@ -249,7 +252,7 @@ def add_items_to_results(representative_blast_results, reps_kmers_sim, bsr_value
                             (result['subject_end'] - result['subject_start'] + 1) / result['subject_length'])
         return local_palign_min
 
-    def update_results(representative_blast_results, query, subject, entry_id, bsr, sim, cov, frequency_cds_cluster, global_palign_all_min, global_palign_all_max, global_palign_pident_min, global_palign_pident_max, local_palign_min, loci_ids, add_groups_ids):
+    def update_results(representative_blast_results, query, subject, entry_id, bsr, sim, cov, frequency_in_genomes, global_palign_all_min, global_palign_all_max, global_palign_pident_min, global_palign_pident_max, local_palign_min, loci_ids, add_groups_ids):
         """
         Updates results for a given query and subject.
         
@@ -265,14 +268,22 @@ def add_items_to_results(representative_blast_results, reps_kmers_sim, bsr_value
             The ID of the entry to update.
         bsr, sim, cov : float
             The BSR, similarity, and coverage values.
-        frequency_cds_cluster : dict
-            A dictionary containing the frequency of CDS clusters.
-        global_palign_all_min, global_palign_all_max, global_palign_pident_min, global_palign_pident_max, local_palign_min : float
+        frequency_in_genomes : dict
+        global_palign_all_min : float
+            Value of the minimum global palign.
+        global_palign_all_max : float
+            Value of the maximum global palign.
+        global_palign_pident_min
+            Value of the minimum global palign based on Pident threshold.
+        global_palign_pident_max : float
+            Value of the maximum global palign based on Pident threshold.
+        local_palign_min : float
             The minimum and maximum global palign values, and the minimum local palign value.
         loci_ids : list
             A list of loci IDs.
-        add_groups_ids : list
-            A list of additional group IDs.
+        add_groups_ids : dict
+            Dict that contains the IDs of the joined groups to add to the results while the values are group
+            members.
         
         Returns
         -------
@@ -288,8 +299,8 @@ def add_items_to_results(representative_blast_results, reps_kmers_sim, bsr_value
             'bsr': bsr,
             'kmers_sim': sim,
             'kmers_cov': cov,
-            'frequency_in_genomes_query_cds': frequency_cds_cluster[query],
-            'frequency_in_genomes_subject_cds': frequency_cds_cluster[subject],
+            'frequency_in_genomes_query_cds': frequency_in_genomes[query],
+            'frequency_in_genomes_subject_cds': frequency_in_genomes[subject],
             'global_palign_all_min' : global_palign_all_min,
             'global_palign_all_max': global_palign_all_max,
             'global_palign_pident_min': global_palign_pident_min,
@@ -369,7 +380,7 @@ def add_items_to_results(representative_blast_results, reps_kmers_sim, bsr_value
                 local_palign_min = calculate_local_palign(result)
                 # Remove entries with negative local palign values meaning that they are inverse alignments.
                 if local_palign_min >= 0:
-                    update_results(representative_blast_results, query, subject, entry_id, bsr, sim, cov, frequency_cds_cluster, global_palign_all_min, global_palign_all_max, global_palign_pident_min, global_palign_pident_max, local_palign_min, loci_ids, add_groups_ids)
+                    update_results(representative_blast_results, query, subject, entry_id, bsr, sim, cov, frequency_in_genomes, global_palign_all_min, global_palign_all_max, global_palign_pident_min, global_palign_pident_max, local_palign_min, loci_ids, add_groups_ids)
                 else:
                     remove_results(representative_blast_results, query, subject, entry_id)
 
@@ -472,9 +483,8 @@ def process_classes(representative_blast_results, classes_outcome, all_alleles =
         info.
     classes_outcome : list
         All of the existing classes.
-    cds_joined_cluster : dict, optional
-        Dict that contains as keys the IDS of joined clusters or loci, and values
-        its elements.
+    all_alleles : dict, optional
+        Dict that contains the cds/loci main ID as key and the value are their alleles.
 
     Returns
     -------
@@ -493,7 +503,8 @@ def process_classes(representative_blast_results, classes_outcome, all_alleles =
     all_relationships = {}
     cluster_to_join = []
     drop_list = set()
-    main_ids = set()
+    related_clusters = []
+
     # Loop over each class
     for class_ in classes_outcome:
         cds_to_keep[class_] = set()
@@ -525,7 +536,6 @@ def process_classes(representative_blast_results, classes_outcome, all_alleles =
                     cluster_to_join.append([new_query, new_id_subject])
                     important_relationships[class_].append(ids_for_relationship + [['j', 'j']])
                     continue
-
                 # Initialize retain list
                 retain = []
 
@@ -548,6 +558,11 @@ def process_classes(representative_blast_results, classes_outcome, all_alleles =
                 elif new_id_subject not in processed_cases:
                     cds_to_keep[class_].add(new_id_subject)
                     retain = ['ad' if new_query in drop_list else 'ar', 'r']
+
+                if class_ not in ['4c','5'] and retain:
+                    validation = itf.add_strings_to_subsets(related_clusters, [new_query, new_id_subject])
+                    if not validation:
+                        related_clusters.append(set([new_query, new_id_subject]))
 
                 if class_ in ['1b', '2a', '3a'] and retain:
                     blastn_entry = matches[list(matches.keys())[0]]
@@ -573,10 +588,10 @@ def process_classes(representative_blast_results, classes_outcome, all_alleles =
     # Create the joined cluster by joining by IDs.
     cds_to_keep['1a'] = {i: join for i, join in enumerate(cf.cluster_by_ids(cluster_to_join), 1)}
 
-    return cds_to_keep, important_relationships, drop_list, all_relationships
+    return cds_to_keep, important_relationships, drop_list, all_relationships, related_clusters
 
 def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path, 
-                          constants, drop_list, loci, groups_paths_old, frequency_cds_cluster,
+                          constants, drop_list, loci, groups_paths_old, frequency_in_genomes,
                           only_loci):
     """
     This function wraps up the results for processing of the unclassified CDSs
@@ -599,6 +614,16 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
     drop_list : list
         Contains the CDS IDs to be removed from further processing for appearing
         fewer time in genomes than their match.
+    loci : dict
+        Dict that contains the loci IDs and paths.
+    groups_paths_old : dict
+        The dictionary containing the old paths for the CDSs groups used 
+        to cp instead of creating new FASTAs files.
+    frequency_in_genomes : dict
+        Dict that contains sum of frequency of that representatives cluster in the
+        genomes of the schema.
+    only_loci : bool
+        If only loci are being processed.
 
     Returns
     -------
@@ -608,6 +633,8 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
     reps_trans_dict_cds : dict
         Dict that contais the translations of all the CDSs inside the various
         groups.
+    master_file_rep : str or None
+        Path to the master file that contains all of the representative sequences.
     """
     def print_classification_results(class_, count, printout, i):
         """
@@ -690,9 +717,10 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
         cds_outcome_results : str
             The path to the results folder.
         groups_paths_old : dict
-            The dictionary containing the old paths.
+            The dictionary containing the old paths for the CDSs groups used 
+            to cp instead of creating new FASTAs files.
         loci : dict
-            The dictionary containing the loci.
+            The dictionary containing the loci IDs and paths.
 
         Returns
         -------
@@ -791,7 +819,7 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
 
         Returns
         -------
-        reps_trans_dict_cds :dict
+        reps_trans_dict_cds : dict
             The dictionary containing the translated sequences.
         """
         groups_trans_folder = os.path.join(fasta_folder, "cds_groups_translation")
@@ -817,7 +845,7 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
 
         return reps_trans_dict_cds
 
-    def write_cluster_members_to_file(output_path, cds_to_keep, clusters, frequency_cds_cluster):
+    def write_cluster_members_to_file(output_path, cds_to_keep, clusters, frequency_in_genomes):
         """
         Write cluster members to file.
 
@@ -829,8 +857,9 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
             The dictionary containing the CDSs to keep.
         clusters : dict
             The dictionary containing the clusters.
-        frequency_cds_cluster : dict
-            The dictionary containing the frequency of each CDS in the cluster.
+        frequency_in_genomes : dict
+            Dict that contains sum of frequency of that representatives cluster in the
+            genomes of the schema.
 
         Returns
         -------
@@ -852,7 +881,7 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
                         cds_ids = [cds_id for cds_id in clusters[rep_id]]
                         for count, cds_id in enumerate(cds_ids):
                             if count == 0:
-                                cluster_members_file.write('\t' + cds_id + '\t' + str(frequency_cds_cluster[rep_id]) + '\n')
+                                cluster_members_file.write('\t' + cds_id + '\t' + str(frequency_in_genomes[rep_id]) + '\n')
                             else:
                                 cluster_members_file.write('\t\t' + cds_id + '\n')
     # Create directories.
@@ -939,7 +968,7 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
     # schema only.
     if only_loci:
         # Write cluster members to file
-        write_cluster_members_to_file(output_path, cds_to_keep, clusters, frequency_cds_cluster)
+        write_cluster_members_to_file(output_path, cds_to_keep, clusters, frequency_in_genomes)
         for case_id, cases in enumerate([cds_cases, loci_cases]):
             # Create directories and write dict to TSV
             cds_outcome_results = create_directory_and_write_dict(cds_outcome_results_fastas_folder, output_path, case_id, cases)
@@ -976,13 +1005,13 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
         reps_trans_dict_cds = translate_possible_new_loci(fasta_folder, groups_paths, groups_paths_reps, constants)
 
         # Write cluster members to file
-        write_cluster_members_to_file(output_path, cds_to_keep, clusters, frequency_cds_cluster)
+        write_cluster_members_to_file(output_path, cds_to_keep, clusters, frequency_in_genomes)
 
         master_file_rep = os.path.join(fasta_folder, 'master_rep_file.fasta')
 
     return groups_paths, reps_trans_dict_cds, master_file_rep
 
-def run_blasts(master_fasta_to_blast_against, cds_to_blast, reps_translation_dict,
+def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
                rep_paths_nuc, output_dir, constants, cpu, multi_fasta = None, if_loci = None):
     """
     This functions runs both BLASTn and Subsequently BLASTp based on results of
@@ -990,16 +1019,15 @@ def run_blasts(master_fasta_to_blast_against, cds_to_blast, reps_translation_dic
     
     Parameters
     ----------
-    master_fasta_to_blast_against : str
-        Path to the master FASTA file that contains all of the nucleotide sequences
-        to BLASTn against.
+    blast_db : str
+        Path to the BLAST db folder.
     cds_to_blast : list
         A list that contains all of the ids to BLASTn against master FASTA file.
     reps_translation_dict : dict
         Dict that contains the translations of all the sequences in the master file
         and the CDSs to BLASTn against master file.
     rep_paths_nuc : dict
-        Dict that contains the ID of the CDSs to BLASTn against master file
+        Dict that contains the ID of the CDSs to BLASTn against BLAST db
         while the value is the path to the FASTA that contains those CDSs.
     output_dir : str
         Path to write the output of the whole function.
@@ -1018,6 +1046,8 @@ def run_blasts(master_fasta_to_blast_against, cds_to_blast, reps_translation_dic
         the common group protein FASTA file to perform BLASTp so the results of 
         BLASTp are more compacted and the results file represent their original 
         input group.
+    if_loci : bool, optional
+        If True, the function will process only loci instead of CDSs.
         
     Returns
     -------
@@ -1035,13 +1065,14 @@ def run_blasts(master_fasta_to_blast_against, cds_to_blast, reps_translation_dic
     """
     
     print("\nRunning BLASTn between cluster representatives..." if not multi_fasta else
-          "\nRunning BLASTn between groups representatives against schema loci short...")
+          "\nRunning BLASTn between groups representatives against schema loci short..." if not if_loci else
+          "\nRunning BLASTn between loci representatives against schema loci...")
     # BLASTn folder
     blastn_output = os.path.join(output_dir, "BLASTn_processing")
     # Create directory
     blastn_results_folder = os.path.join(blastn_output, "BLASTn_results")
     ff.create_directory(blastn_results_folder)
-    # Run BLASTn for all representatives (rep vs all)
+    # Run BLASTn
     # Calculate max id length for print.
     max_id_length = len(max(cds_to_blast))
     total_reps = len(rep_paths_nuc)
@@ -1050,12 +1081,13 @@ def run_blasts(master_fasta_to_blast_against, cds_to_blast, reps_translation_dic
     representative_blast_results_coords_pident = {}
     i = 1
     with concurrent.futures.ProcessPoolExecutor(max_workers=cpu) as executor:
-        for res in executor.map(bf.run_all_representative_blasts_multiprocessing,
-                                cds_to_blast,
+        for res in executor.map(bf.run_blastdb_multiprocessing,
                                 repeat('blastn'),
-                                repeat(blastn_results_folder),
-                                repeat(rep_paths_nuc),
-                                repeat(master_fasta_to_blast_against)):
+                                repeat(blast_db),
+                                rep_paths_nuc.values(),
+                                cds_to_blast,
+                                repeat(blastn_results_folder)
+                                ):
 
             filtered_alignments_dict, _, alignment_coords_all, alignment_coords_pident = af.get_alignments_dict_from_blast_results(
                 res[1], constants[1], True, False, True, if_loci)
@@ -1187,7 +1219,7 @@ def run_blasts(master_fasta_to_blast_against, cds_to_blast, reps_translation_dic
     # Run BLASTp between all BLASTn matches (rep vs all its BLASTn matches)  .      
     i = 1
     with concurrent.futures.ProcessPoolExecutor(max_workers=cpu) as executor:
-        for res in executor.map(bf.run_all_representative_blasts_multiprocessing,
+        for res in executor.map(bf.run_blast_fastas_multiprocessing,
                                 blastp_runs_to_do, 
                                 repeat('blastp'),
                                 repeat(blastp_results_folder),
@@ -1291,9 +1323,9 @@ def report_main_relationships(important_relationships, representative_blast_resu
             # If file already exists just append.
             write_type = 'a' if os.path.exists(report_file_path) else 'w'
             # if add CDS cluster id.
-            cds_cluster = True if loci else False
+            add_group_column = True if loci else False
             # Write to file the results.
-            alignment_dict_to_file(write_dict, report_file_path, write_type, cds_cluster)
+            alignment_dict_to_file(write_dict, report_file_path, write_type, add_group_column)
             #TODO finish this function
             write_master_file = os.path.join(relationship_output_dir, "master_relationships_file.tsv")
             write_type = 'a' if os.path.exists(write_master_file) else 'w'
@@ -1301,7 +1333,7 @@ def report_main_relationships(important_relationships, representative_blast_resu
                 if write_type == 'w':
                     master_file.write('Query_ID\tSubject_ID\tStatus_query\tStatus_subject\tClass')
                 master_file.write(f"{query_id}\t{subject_id}\t{retain[0]}\t{retain[1]}\t{class_}")
-            alignment_dict_to_file(write_dict, write_master_file, write_type, cds_cluster)
+            alignment_dict_to_file(write_dict, write_master_file, write_type, add_group_column)
 
 def write_processed_results_to_file(cds_to_keep, representative_blast_results,
                                     classes_outcome, all_alleles, is_matched, is_matched_alleles, output_path):
@@ -1323,6 +1355,8 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
         Can be None if no loci are involved.
     is_matched : dict
         Dictionary of CDS/loci that were matched.
+    is_matched_alleles : dict
+        Dictionary that contains the alleles of the matched CDS/loci.
     output_path : str
         Path were to write files.
         
@@ -1345,14 +1379,14 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
         is_matched : dict
             Dictionary of CDS/loci that were matched.
         is_matched_alleles : dict
-            Dictionary that
+            Dictionary that contains the alleles of the matched CDS/loci.
         output_path : str
             Path to the output directory.
 
         Returns
         -------
-        add_groups_ids : bool
-            True if additional group IDs are present, False otherwise.
+        add_groups_column : bool
+            True if additional there is group name that represents that CDS, False otherwise.
         """
         # Loop over each class and its corresponding CDS
         for class_, cds in cds_to_keep.items():
@@ -1361,17 +1395,17 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
             # Loop over each cluster in the CDS
             for id_, cluster in enumerate(cds, 1):
                 # Process the cluster and get the necessary details
-                id_, cluster, cluster_type, is_cds, add_groups_ids = process_cluster(class_, id_, cluster, all_alleles, cds)
+                id_, cluster, cluster_type, is_cds, add_groups_column = process_cluster(class_, id_, cluster, all_alleles, cds)
                 # Generate a dictionary to be written to the file
                 write_dict = generate_write_dict(id_, cluster, is_cds, is_matched, is_matched_alleles, representative_blast_results)
                 # Define the path of the report file
                 report_file_path = os.path.join(output_path, f"blast_{cluster_type}_{id_}.tsv")
                 # Write the dictionary to the file
-                alignment_dict_to_file(write_dict, report_file_path, 'w', add_groups_ids)
+                alignment_dict_to_file(write_dict, report_file_path, 'w', add_groups_column)
         
-        return add_groups_ids
+        return add_groups_column
 
-    def process_cluster(class_,id_ , cluster, all_alleles, cds):
+    def process_cluster(class_, id_, cluster, all_alleles, cds):
         """
         Process a single cluster.
 
@@ -1393,12 +1427,12 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
         id_ : str or int
             ID of the cluster.
         cluster : list
-            List of the clusters.
+            List with the clusters elements IDs.
         cluster_type : str
             Type of the cluster.
         is_cds : bool
             True if it's a CDS and not a loci, False otherwise.
-        add_groups_ids : bool
+        add_groups_column : bool
             True if additional group IDs are present, False otherwise.
 
         """
@@ -1413,7 +1447,7 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
 
         # Check if all_alleles exist
         if all_alleles:
-            add_groups_ids = True
+            add_groups_column= True
             is_cds = False
             cluster_alleles = []
             for entry in cluster:
@@ -1428,10 +1462,10 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
             if not is_cds:
                 cluster = cluster_alleles
         else:
-            add_groups_ids = False
+            add_groups_column = False
             is_cds = True
 
-        return id_, cluster, cluster_type, is_cds, add_groups_ids
+        return id_, cluster, cluster_type, is_cds, add_groups_column
 
     def generate_write_dict(id_, cluster, is_cds, is_matched, is_matched_alleles, representative_blast_results):
         """
@@ -1447,6 +1481,8 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
             Boolean indicating if it's a CDS.
         is_matched : dict
             Dictionary of CDS/loci that were matched.
+        is_matched_alleles : dict
+            Dictionary that contains the alleles of the matched CDS/loci.
         representative_blast_results : dict
             Dictionary of representative blast results.
 
@@ -1469,7 +1505,7 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
                         for query, subjects in representative_blast_results.items()
                         if itf.remove_by_regex(query, '_(\d+)') in queries}
         # for cases that didn't match anything but got matched against.
-        elif id_ in is_matched:
+        elif is_matched and id_ in is_matched:
             queries = is_matched[id_]
             cluster = is_matched_alleles[id_]
             # Generate the dictionary to be written
@@ -1486,7 +1522,7 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
                         if query in cluster}
         return write_dict
 
-    def process_classes(classes_outcome, representative_blast_results, output_path, add_groups_ids):
+    def process_classes(classes_outcome, representative_blast_results, output_path, add_group_column):
         """
         Process and write class results.
 
@@ -1498,8 +1534,8 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
             Dictionary of representative blast results.
         output_path : str
             Path to the output directory.
-        add_groups_ids : bool
-            Boolean indicating if additional group IDs are present.
+        add_group_column : bool
+            Boolean indicating if column header should be added
 
         Returns
         -------
@@ -1514,7 +1550,7 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
             # Define the path of the report file
             report_file_path = os.path.join(output_path, f"blastn_group_{class_}.tsv")
             # Write the dictionary to the file
-            alignment_dict_to_file(write_dict, report_file_path, 'w', add_groups_ids)
+            alignment_dict_to_file(write_dict, report_file_path, 'w', add_group_column)
 
     # Create directories for output
     blast_by_cluster_output = os.path.join(output_path, 'blast_by_cluster')
@@ -1523,14 +1559,14 @@ def write_processed_results_to_file(cds_to_keep, representative_blast_results,
     ff.create_directory(blast_results_by_class_output)
 
     # Process and write cluster results
-    add_groups_ids = process_clusters(cds_to_keep, representative_blast_results, all_alleles, is_matched, is_matched_alleles, blast_by_cluster_output)
+    add_group_column = process_clusters(cds_to_keep, representative_blast_results, all_alleles, is_matched, is_matched_alleles, blast_by_cluster_output)
 
     # Process and write class results
-    process_classes(classes_outcome, representative_blast_results, blast_results_by_class_output, add_groups_ids)
+    process_classes(classes_outcome, representative_blast_results, blast_results_by_class_output, add_group_column)
 
 def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds, 
-                   cds_to_keep, frequency_cds_cluster, allelecall_directory, 
-                   master_file_rep, loci_ids, only_loci, master_alleles, constants, cpu):
+                   cds_to_keep, frequency_in_genomes, allelecall_directory, 
+                   master_file_rep, loci_ids, master_alleles, constants, cpu):
     """
     This function processes data related to the schema seed, importing, translating
     and BLASTing against the unclassified CDS clusters representatives groups to
@@ -1540,20 +1576,27 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
     ----------
     schema : str
         Path to the schema seed folder.
-    groups_trans_reps : dict
-        Dict with the paths to the translations of the unclassified CDS clusters.
+    groups_paths : dict
+        Dict that contains the path to the FASTA file for each group.
     results_output : str
         Path were to write the results of this function.
     reps_trans_dict_cds : dict
         Dict that contains the translations for each CDS.
     cds_to_keep : dict     
         Dict of the CDS to keep by each classification.
-    master_file_rep : str
-        Path to the maste file containing retained CDS.
-    frequency_cds_cluster : dict
-        Contains the frequency of each CDS/loci in the genomes.
+    frequency_in_genomes : dict
+        Dict that contains sum of frequency of that representatives cluster in the
+        genomes of the schema.
     allelecall_directory : str
         Path to the allele call directory.
+    master_file_rep : str
+        Path to the master file containing retained CDS.
+    loci_ids : list
+        List containg two bools, each representing query and subject, True
+        if they are loci False otherwise.
+    master_alleles : bool
+        If True, the function will process all of the alleles of the loci, if False only the
+        representatives.
     constants : list
         Contains the constants to be used in this function.
     cpu : int
@@ -1566,8 +1609,10 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
         info.
 
     """
+    blast_results = os.path.join(results_output, "BLAST_processing")
+    ff.create_directory(blast_results)
     # Create BLASTn_processing directory
-    blastn_output = os.path.join(results_output, "BLASTn_processing")
+    blastn_output = os.path.join(blast_results, "BLASTn_processing")
     ff.create_directory(blastn_output)
 
     # Get all of the schema loci short FASTA files path.
@@ -1590,16 +1635,16 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
     results_statistics = os.path.join(allelecall_directory, 'loci_summary_stats.tsv')
     # Convert TSV table to dict.
     results_statistics_dict = itf.tsv_to_dict(results_statistics)
-    # Add the results for all of the Exact matches to the frequency_cds_cluster dict.
+    # Add the results for all of the Exact matches to the frequency_in_genomes dict.
     for key, value in results_statistics_dict.items():
-        frequency_cds_cluster.setdefault(key, int(value[0]))
+        frequency_in_genomes.setdefault(key, int(value[0]))
     # Translate each short loci and write to master fasta.
     i = 1
     len_short_folder = len(schema_loci_short)
     all_alleles = {}
     if not master_file_rep:
         filename = 'master_file' if master_alleles else 'master_file_rep'
-        master_file_rep_folder = os.path.join(results_output, filename)
+        master_file_rep_folder = os.path.join(blastn_output, filename)
         ff.create_directory(master_file_rep_folder)
         master_file_rep = os.path.join(master_file_rep_folder, f"{filename}.fasta")
         write_to_master = True
@@ -1632,15 +1677,20 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
         for allele_id, sequence in translation_dict.items():
             reps_trans_dict_cds[allele_id] = sequence
 
+    # Create BLAST db for the schema DNA sequences.
+    blast_db = os.path.join(blastn_output, "blast_db_nuc")
+    ff.create_directory(blast_db)
+    bf.make_blast_db(master_file_rep, blast_db, 'nucl')
+
     [representative_blast_results,
      representative_blast_results_coords_all,
      representative_blast_results_coords_pident,
      bsr_values,
-     _] = run_blasts(master_file_rep,
+     _] = run_blasts(blast_db,
                      schema_loci_short,
                      reps_trans_dict_cds,
                      schema_loci_short,
-                     results_output,
+                     blast_results,
                      constants,
                      cpu,
                      all_alleles,
@@ -1651,7 +1701,7 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
                          bsr_values,
                          representative_blast_results_coords_all,
                          representative_blast_results_coords_pident,
-                         frequency_cds_cluster,
+                         frequency_in_genomes,
                          loci_ids,
                          cds_to_keep['1a'] if cds_to_keep else None)
 
@@ -1669,9 +1719,14 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
     
     print("\nProcessing classes...")
     # Process the results_outcome dict and write individual classes to TSV file.
-    [cds_to_keep, important_relationships, drop_list, all_relationships] = process_classes(representative_blast_results,
-                                                                                           classes_outcome,
-                                                                                           all_alleles)
+    [cds_to_keep, important_relationships, drop_list, all_relationships, related_clusters] = process_classes(representative_blast_results,
+                                                                                                            classes_outcome,
+                                                                                                            all_alleles)
+    related_matches = os.path.join(results_output, "related_matches.tsv")
+    with open(related_matches, 'w') as related_matches_file:
+        for related in related_clusters:
+            related_matches_file.write('\t'.join(str(item) for item in related) + '\n')
+    
     # Filter repeated entries
     seen = set()
     for class_, entries in list(cds_to_keep.items()):
@@ -1737,7 +1792,7 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
                         drop_list,
                         schema_loci_short,
                         groups_paths,
-                        frequency_cds_cluster,
-                        only_loci)
+                        frequency_in_genomes,
+                        all(loci_ids))
 
     return representative_blast_results
