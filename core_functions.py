@@ -8,20 +8,16 @@ try:
                        clustering_functions as cf,
                        blast_functions as bf,
                        alignments_functions as af,
-                       kmers_functions as kf,
                        iterable_functions as itf,
-                       graphical_functions as gf,
-                       pandas_functions as pf)
+                       linux_functions as lf)
 except ModuleNotFoundError:
     from SchemaRefinery.utils import (file_functions as ff,
                                       sequence_functions as sf,
                                       clustering_functions as cf,
                                       blast_functions as bf,
                                       alignments_functions as af,
-                                      kmers_functions as kf,
                                       iterable_functions as itf,
-                                      graphical_functions as gf,
-                                      pandas_functions as pf)
+                                      linux_functions as lf)
 
 def alignment_dict_to_file(blast_results_dict, file_path, write_type, add_group_column = False):
     """
@@ -497,13 +493,39 @@ def process_classes(representative_blast_results, classes_outcome, all_alleles =
         Contains the CDS IDs to be removed from further processing for appearing
         fewer time in genomes than their match.
     """
+
+    def find_key_for_strings(strings, dict_of_lists):
+        """
+        Identifies if any string from a list is present in any list inside a dictionary.
+        If a string is found, it is added to the list.
+
+        Parameters
+        ----------
+        strings : list
+            A list of strings to check.
+        dict_of_lists : dict
+            A dictionary where the values are lists.
+
+        Returns
+        -------
+        dict
+            The updated dictionary.
+        """
+        for i, string in enumerate(strings):
+            if i == 1:
+                continue
+            found_key = itf.identify_value_in_dict_lists(string, dict_of_lists)
+            if found_key:
+                break
+        return found_key
+
     # Initialize variables
     cds_to_keep = {}
     important_relationships = {}
     all_relationships = {}
     cluster_to_join = []
     drop_list = set()
-    related_clusters = []
+    related_clusters = {}
 
     # Loop over each class
     for class_ in classes_outcome:
@@ -559,26 +581,40 @@ def process_classes(representative_blast_results, classes_outcome, all_alleles =
                     cds_to_keep[class_].add(new_id_subject)
                     retain = ['ad' if new_query in drop_list else 'ar', 'r']
 
-                if class_ not in ['4c','5'] and retain:
-                    validation = itf.add_strings_to_subsets(related_clusters, [new_query, new_id_subject])
-                    if not validation:
-                        related_clusters.append(set([new_query, new_id_subject]))
-
                 if class_ in ['1b', '2a', '3a'] and retain:
                     blastn_entry = matches[list(matches.keys())[0]]
                     # Determine if the frequency of the query is greater than the subject.
                     is_frequency_greater = blastn_entry['frequency_in_genomes_query_cds'] >= blastn_entry['frequency_in_genomes_subject_cds']
                     # Determine if the query or subject should be dropped.
-                    id_or_query = new_id_subject if is_frequency_greater else new_query
+                    query_or_subject = new_id_subject if is_frequency_greater else new_query
                     # Position of the retain value in the list.
                     retain_index = 1 if is_frequency_greater else 0
                     # Choose the retain value based on the frequency of the query and subject and presence 
-                    retain_value = 'ar' if id_or_query in retained_cases else 'ad' if id_or_query in drop_list else 'd'
+                    retain_value = 'ar' if query_or_subject in retained_cases else 'ad' if query_or_subject in drop_list else 'd'
                     
                     retain[retain_index] = retain_value
                     if retain_value != 'ar':
-                        drop_list.add(id_or_query)
-                        cds_to_keep[class_].discard(id_or_query)
+                        drop_list.add(query_or_subject)
+                        cds_to_keep[class_].discard(query_or_subject)
+
+                # For the related_matches.tsv file.
+                if class_ not in ['4c','5'] and retain:
+                    strings = [new_query, class_, new_id_subject]
+                    found_key = find_key_for_strings([new_query, class_, new_id_subject], related_clusters)
+                    # Add asterisk to the query or subject that was dropped.
+                    if class_ in ['1b', '2a', '3a']:
+                        if query == query_or_subject:
+                            strings[0] + '*' 
+                        else:
+                            strings[1] + '*' 
+                    if not found_key:
+                        if not related_clusters:
+                            related_clusters[1] = [[new_query, class_, new_id_subject]]
+                        else:
+                            index = len(related_clusters) + 1
+                            related_clusters.setdefault(index, []).append([new_query, class_ , new_id_subject])
+                    else:
+                        related_clusters[found_key].append(strings)
 
                 if retain:
                     important_relationships[class_].append(ids_for_relationship + [retain])
@@ -726,11 +762,17 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
         -------
         None, copies file from origin to destination.
         """
-        i = 1
         for cds in cds_list:
             if class_ == '1a':
-                class_name_cds = f"joined_{i}"
-                i += 1
+                class_name_cds = f"joined_{cds}"
+                for i in cds_list[cds]:
+                    file_path = os.path.join(cds_outcome_results, class_name_cds)
+                    origin_path = groups_paths_old.pop(i) if case_id == 0 else loci[i]
+                    if not os.path.exists(file_path):
+                        ff.copy_file(origin_path, file_path)
+                    else:
+                        ff.concat_files(origin_path, file_path)
+                continue
             elif class_ == 'dropped':
                 class_name_cds = f"dropped_{cds}"
             else:
@@ -829,7 +871,13 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
             trans_path = os.path.join(groups_trans_folder, os.path.basename(group_path))
             groups_trans[key] = trans_path
             fasta_dict = sf.fetch_fasta_dict(group_path, False)
-            trans_dict, _, _ = sf.translate_seq_deduplicate(fasta_dict, trans_path, None, constants[5], False, False)
+            trans_dict, _, _ = sf.translate_seq_deduplicate(fasta_dict,
+                                                            trans_path,
+                                                            None,
+                                                            constants[5],
+                                                            False,
+                                                            constants[6],
+                                                            False)
         
         group_trans_rep_folder = os.path.join(fasta_folder, "cds_groups_translation_reps")
         ff.create_directory(group_trans_rep_folder)
@@ -839,7 +887,13 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
             trans_path = os.path.join(group_trans_rep_folder, os.path.basename(group_path))
             groups_trans_reps_paths[key] = trans_path
             fasta_dict = sf.fetch_fasta_dict(group_path, False)
-            trans_dict, _, _ = sf.translate_seq_deduplicate(fasta_dict, trans_path, None, constants[5], False, False)
+            trans_dict, _, _ = sf.translate_seq_deduplicate(fasta_dict,
+                                                            trans_path,
+                                                            None,
+                                                            constants[5],
+                                                            False,
+                                                            constants[6],
+                                                            False)
             for id_, sequence in trans_dict.items():
                 reps_trans_dict_cds[id_] = sequence
 
@@ -987,10 +1041,11 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
             for class_, cds_list in cases.items():
                 copy_fasta(class_, cds_list, case_id, cds_outcome_results, groups_paths_old, loci)
             # Copy CDS that didnt match
-            for cds, path in groups_paths_old.items():
-                cds_name = f"retained_not_matched_by_blastn_{cds}"
-                file_path = os.path.join(cds_outcome_results, cds_name)
-                ff.copy_file(path, file_path)
+            if case_id == 0:
+                for cds, path in groups_paths_old.items():
+                    cds_name = f"retained_not_matched_by_blastn_{cds}"
+                    file_path = os.path.join(cds_outcome_results, cds_name)
+                    ff.copy_file(path, file_path)
 
         master_file_rep = None
         reps_trans_dict_cds = None
@@ -1079,10 +1134,12 @@ def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
     representative_blast_results = {}
     representative_blast_results_coords_all = {}
     representative_blast_results_coords_pident = {}
+    # Get Path to the blastn executable
+    get_blastn_exec = lf.get_tool_path('blastn')
     i = 1
     with concurrent.futures.ProcessPoolExecutor(max_workers=cpu) as executor:
         for res in executor.map(bf.run_blastdb_multiprocessing,
-                                repeat('blastn'),
+                                repeat(get_blastn_exec),
                                 repeat(blast_db),
                                 rep_paths_nuc.values(),
                                 cds_to_blast,
@@ -1195,12 +1252,14 @@ def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
     for query in rep_paths_prot:
         # For self-score
         self_score_dict[query] = {}
-    # Calculate self-score
+    # Get Path to the blastp executable
+    get_blastp_exec = lf.get_tool_path('blastp')
     i = 1
+    # Calculate self-score
     with concurrent.futures.ProcessPoolExecutor(max_workers=cpu) as executor:
         for res in executor.map(bf.run_self_score_multiprocessing,
                                 rep_paths_prot.keys(),
-                                repeat('blastp'),
+                                repeat(get_blastp_exec),
                                 rep_paths_prot.values(),
                                 repeat(blastp_results_ss_folder)):
             
@@ -1221,7 +1280,7 @@ def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
     with concurrent.futures.ProcessPoolExecutor(max_workers=cpu) as executor:
         for res in executor.map(bf.run_blast_fastas_multiprocessing,
                                 blastp_runs_to_do, 
-                                repeat('blastp'),
+                                repeat(get_blastp_exec),
                                 repeat(blastp_results_folder),
                                 repeat(rep_paths_prot),
                                 rep_matches_prot.values()):
@@ -1673,14 +1732,17 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
                                                               None,
                                                               constants[5],
                                                               False,
+                                                              constants[6],
                                                               False)
         for allele_id, sequence in translation_dict.items():
             reps_trans_dict_cds[allele_id] = sequence
 
     # Create BLAST db for the schema DNA sequences.
+    print(f"\nCreate BLAST db for the {'schema' if master_alleles else 'unclassified'} DNA sequences...")
+    makeblastdb_exec = lf.get_tool_path('makeblastdb')
     blast_db = os.path.join(blastn_output, "blast_db_nuc")
     ff.create_directory(blast_db)
-    bf.make_blast_db(master_file_rep, blast_db, 'nucl')
+    bf.make_blast_db(makeblastdb_exec, master_file_rep, blast_db, 'nucl')
 
     [representative_blast_results,
      representative_blast_results_coords_all,
@@ -1724,8 +1786,11 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
                                                                                                             all_alleles)
     related_matches = os.path.join(results_output, "related_matches.tsv")
     with open(related_matches, 'w') as related_matches_file:
-        for related in related_clusters:
-            related_matches_file.write('\t'.join(str(item) for item in related) + '\n')
+        for related in related_clusters.values():
+            for r in related:
+                related_matches_file.write('\t'.join(str(item) for item in r) + '\n')
+
+            related_matches_file.write('\n')
     
     # Filter repeated entries
     seen = set()
@@ -1790,7 +1855,7 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
                         results_output,
                         constants,
                         drop_list,
-                        schema_loci_short,
+                        schema_loci,
                         groups_paths,
                         frequency_in_genomes,
                         all(loci_ids))
