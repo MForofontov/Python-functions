@@ -333,6 +333,30 @@ def identify_string_in_dict(input_str, dictionary):
             return key
     return None
 
+def identify_string_in_dict_lists_regex(target_value, dict_of_lists, regex=False):
+    """
+    Identifies if a string is present in any list inside a dictionary.
+
+    Parameters
+    ----------
+    target_string : str
+        The value to find.
+    dict_of_lists : dict
+        A dictionary where the values are lists of lists.
+    regex : str, optional
+        A regex pattern to search for in the lists.
+
+    Returns
+    -------
+    key : int or str
+        The key of the entry where the string is present, or False if not found.
+    """
+    for key, lists in dict_of_lists.items():
+        for list_ in lists:
+            if target_value in [remove_by_regex(l, regex) for l in list_] if regex else list_:
+                return key
+    return False
+
 def has_element_of_type(input_list, target_type):
     """
     Check if any element in the input list matches the specified target type.
@@ -494,6 +518,25 @@ def regex_present(regex_list, string):
     """
     return any(re.search(regex, string) for regex in regex_list)
 
+def search_string_by_regex(pattern, string):
+    """
+    Searches for a regex pattern in a string.
+
+    Parameters
+    ----------
+    pattern : str
+        The regex pattern to search for.
+    string : str
+        The string to search in.
+
+    Returns
+    -------
+    return : str
+        The match object if the pattern is found, original string otherwise.
+    """
+    match = re.search(pattern, string)
+    return match.group(1) if match else string
+
 def add_strings_to_subsets(my_list, my_strings):
     """
     Clustering algorithm that finds a string in a list of strings in
@@ -510,3 +553,24 @@ def add_strings_to_subsets(my_list, my_strings):
                 found = True
                 break
     return found
+#Not used
+def find_index(input_list, target_string):
+    """
+    Find the index of a string in a list.
+
+    Parameters
+    ----------
+    input_list : list
+        The list to search.
+    target_string : str
+        The string to find.
+
+    Returns
+    -------
+    index : int
+        The index of the string in the list, or None if the string is not found.
+    """
+    try:
+        return input_list.index(target_string)
+    except ValueError:
+        return None
