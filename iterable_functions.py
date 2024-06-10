@@ -553,7 +553,7 @@ def add_strings_to_subsets(my_list, my_strings):
                 found = True
                 break
     return found
-#Not used
+#Unused
 def find_index(input_list, target_string):
     """
     Find the index of a string in a list.
