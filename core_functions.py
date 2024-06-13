@@ -466,6 +466,27 @@ def separate_blastn_results_into_classes(representative_blast_results, constants
 
     return classes_outcome
 
+def sort_blast_results_by_classes(representative_blast_results, classes_outcome):
+    sorted_blast_dict = {}
+    temp_dict = {k: {} for k in classes_outcome}
+    
+    for query, rep_blast_result in representative_blast_results.items():
+        for id_subject, matches in rep_blast_result.items():
+            # Class of the alignment with biggest score.
+            class_ = matches[1]['class']
+            if not temp_dict[class_].get(query):
+                temp_dict[class_][query] = {}
+            temp_dict[class_][query][id_subject] = matches
+    
+    for class_, sorted_blast_reps in temp_dict.items():
+        for query, rep_blast_result in sorted_blast_reps.items():
+            if not sorted_blast_dict.get(query):
+                sorted_blast_dict[query] = {}
+            for id_subject, matches in rep_blast_result.items():
+                    sorted_blast_dict[query][id_subject] = matches
+    
+    return sorted_blast_dict
+
 def process_classes(representative_blast_results, classes_outcome, all_alleles = None):
     """
     Process the classified representative_blast_results to identify the CDS
@@ -484,150 +505,272 @@ def process_classes(representative_blast_results, classes_outcome, all_alleles =
 
     Returns
     -------
-    cds_to_keep : dict     
-        Dict of the CDS to keep by each classification.
-    important_relationships : dict
-        Dict that contains as keys the class and values the decisive relatioships
-        between loci/CDS.
-    drop_list : dict
-        Contains the CDS IDs to be removed from further processing for appearing
-        fewer time in genomes than their match.
+    processed_results : dict
+        Dict that contains the processed results.
+    count_results_by_class : dict
+        Dict that contains the count of results by class (how many rep/alelles had of each classification).
     """
 
-    def find_key_for_strings(strings, dict_of_lists):
-        """
-        Identifies if any string from a list is present in any list inside a dictionary.
-        If a string is found, it is added to the list.
-
-        Parameters
-        ----------
-        strings : list
-            A list of strings to check.
-        dict_of_lists : dict
-            A dictionary where the values are lists.
-
-        Returns
-        -------
-        dict
-            The updated dictionary.
-        """
-        for i, string in enumerate(strings):
-            if i == 1:
-                continue
-            found_key = itf.identify_value_in_dict_lists(string, dict_of_lists)
-            if found_key:
-                break
-        return found_key
-
     # Initialize variables
+    count_results_by_class = {}
+    processed_results = {}
+
+    # Process the CDS to find what CDS to retain while also adding the relationships between different CDS
+    for query, rep_blast_result in representative_blast_results.items():
+        for id_subject, matches in rep_blast_result.items():
+            class_ = matches[1]['class'] 
+            ids_for_relationship = [query, id_subject]
+            new_query = query
+            new_id_subject = id_subject
+
+            strings = [str(query), class_, str(id_subject)]
+            if all_alleles:
+                replaced_query = itf.identify_string_in_dict(query, all_alleles)
+                if replaced_query:
+                    new_query = replaced_query
+                    strings[0] = new_query if type(new_query) == str else f"{query}({new_query})"
+                replaced_id_subject = itf.identify_string_in_dict(id_subject, all_alleles)
+                if replaced_id_subject:
+                    new_id_subject = replaced_id_subject
+                    strings[2] = new_id_subject if type(new_id_subject) == str else f"{id_subject}({new_id_subject})"
+
+                current_allele_class_index = classes_outcome.index(class_)
+                # Check if the current loci were already processed
+                if not processed_results.get(f"{new_query}|{new_id_subject}"):
+                    run_next_step = True
+                # If those loci/CDS were already processed, check if the current class is better than the previous one
+                elif current_allele_class_index < classes_outcome.index(processed_results[f"{new_query}|{new_id_subject}"][1]):
+                    run_next_step = True
+                # If not then skip the current alleles
+                else:
+                    run_next_step = False
+            else:
+                run_next_step = True
+
+            count_results_by_class.setdefault(f"{new_query}|{new_id_subject}", {})
+            if not count_results_by_class[f"{new_query}|{new_id_subject}"].get(class_):
+                count_results_by_class[f"{new_query}|{new_id_subject}"].setdefault(class_, 1)
+            else:
+                count_results_by_class[f"{new_query}|{new_id_subject}"][class_] += 1
+
+            if run_next_step:
+                # Set all None to run newly for this query/subject combination
+                processed_results[f"{new_query}|{new_id_subject}"] = [None,
+                                                        None,
+                                                        None,
+                                                        None,
+                                                        None,
+                                                        None]
+                # Find cases that were already processed or to be dropped
+                retained_cases= itf.flatten_list([v[0] for k, v in processed_results.items() if v[0]])
+                drop_list = [v[3] for k, v in processed_results.items() if v[3]]
+                processed_cases = retained_cases + drop_list
+                # Process cases '1a'
+                if class_ == '1a':
+                    if new_query not in processed_cases and new_id_subject not in processed_cases:
+                        keep_cds = [new_query, new_id_subject]
+                        important_relationship = True
+                    else:
+                        keep_cds = []
+                        important_relationship = False
+
+                    processed_results[f"{new_query}|{new_id_subject}"] = [keep_cds,
+                                                                            class_,
+                                                                            [ids_for_relationship + [['j', 'j']], important_relationship],
+                                                                            [],
+                                                                            [new_query, new_id_subject],
+                                                                            strings]
+                    #TODO: find where ids of class 1a where added and elimante them processed_results
+                    continue
+                # Process cases where neither query nor subject were processed
+                keep_cds = []
+                retain = []
+                if new_query not in processed_cases and new_id_subject not in processed_cases:
+                    keep_cds = [new_query, new_id_subject]
+                    retain = ['r', 'r']
+
+                # Process cases where only query was not processed
+                elif new_query not in processed_cases:
+                    keep_cds = [new_query]
+                    retain = ['r', 'ad' if new_id_subject in drop_list else 'ar']
+
+                # Process cases where only subject was not processed
+                elif new_id_subject not in processed_cases:
+                    keep_cds = [new_id_subject]
+                    retain = ['ad' if new_query in drop_list else 'ar', 'r']
+
+                if class_ in ['1b', '2a', '3a'] and retain:
+                    if len(keep_cds) == 2:
+                        blastn_entry = matches[list(matches.keys())[0]]
+                        # Determine if the frequency of the query is greater than the subject.
+                        is_frequency_greater = blastn_entry['frequency_in_genomes_query_cds'] >= blastn_entry['frequency_in_genomes_subject_cds']
+                        # Determine if the query or subject should be dropped.
+                        query_or_subject = new_id_subject if is_frequency_greater else new_query
+                        # Position of the retain value in the list.
+                        retain_index = 1 if is_frequency_greater else 0
+                        # Choose the retain value based on the frequency of the query and subject and presence 
+                        retain_value = 'ar' if query_or_subject in retained_cases else 'ad' if query_or_subject in drop_list else 'd'
+                        
+                        retain[retain_index] = retain_value
+                        if retain_value != 'ar':
+                            keep_cds.remove(query_or_subject)
+                    else:
+                        query_or_subject = []
+                else:
+                    query_or_subject = []
+
+                # For the related_matches.tsv file.
+                if class_ not in ['4c','5']:
+                    # Add asterisk to the query or subject that was dropped.
+                    if class_ in ['1b', '2a', '3a']:
+                        blastn_entry = matches[list(matches.keys())[0]]
+                        # Determine if the frequency of the query is greater than the subject.
+                        is_frequency_greater = blastn_entry['frequency_in_genomes_query_cds'] >= blastn_entry['frequency_in_genomes_subject_cds']
+                        # Determine if the query or subject should be dropped.
+                        dropped = new_id_subject if is_frequency_greater else new_query
+                        if new_query == dropped:
+                            strings[0] += '*' 
+                        else:
+                            strings[2] += '*'
+
+                important_relationship = True if retain else False
+
+                processed_results[f"{new_query}|{new_id_subject}"] = [keep_cds,
+                                                    class_,
+                                                    [ids_for_relationship + [retain], important_relationship],
+                                                    query_or_subject,
+                                                    [new_query, new_id_subject],
+                                                    strings]
+
+    return processed_results, count_results_by_class
+
+def extract_results(processed_results, count_results_by_class, all_alleles, classes_outcome):
+    """
+    Extracts and organizes results from process_classes.
+
+    Parameters
+    ----------
+    processed_results : dict
+        The processed results data.
+    count_results_by_class : dict
+        A dictionary with counts of results by class.
+    all_alleles : bool
+        A flag indicating whether all alleles are to be considered.
+    classes_outcome : list
+        A list of class outcomes.
+
+    Returns
+    -------
+    cds_to_keep : dict
+        CDS and loci to keep by each classification.
+    important_relationships : dict
+        Important relationships between loci and CDS that were decisive to keep them or not.
+    drop_set : set
+        Set of CDS/loci IDs to be dropped from further processing.
+    all_relationships : dict
+        All relationships between loci and CDS.
+    related_clusters : dict
+        Dict that groups CDS/loci by ID and that contains strings to write in output file.
+    """
     cds_to_keep = {}
     important_relationships = {}
     all_relationships = {}
-    cluster_to_join = []
-    drop_list = set()
     related_clusters = {}
 
-    # Loop over each class
     for class_ in classes_outcome:
         cds_to_keep[class_] = set()
         important_relationships[class_] = []
         all_relationships[class_] = []
 
-        # Get all entries with the desired class and remove empty entries
-        class_dict = {query: {subject: {id_: entry for id_, entry in entries.items() if entry['class'] == class_}
-                              for subject, entries in subjects.items()}
-                      for query, subjects in representative_blast_results.items()}
-        itf.remove_empty_dicts_recursive(class_dict)
-
-        # Process the CDS to find what CDS to retain while also adding the relationships between different CDS
-        for query, rep_blast_result in class_dict.items():
-            for id_subject, matches in rep_blast_result.items():
-                ids_for_relationship = [query, id_subject]
-                new_query = query
-                new_id_subject = id_subject
-                if all_alleles:
-                    replaced_query = itf.identify_string_in_dict(query, all_alleles)
-                    if replaced_query:
-                        new_query = replaced_query
-                    replaced_id_subject = itf.identify_string_in_dict(id_subject, all_alleles)
-                    if replaced_id_subject:
-                        new_id_subject = replaced_id_subject
-                # Process all of the cases that have 1a classification
-                if class_ == '1a':
-                    cds_to_keep[class_].update([new_query, new_id_subject])
-                    cluster_to_join.append([new_query, new_id_subject])
-                    important_relationships[class_].append(ids_for_relationship + [['j', 'j']])
-                    continue
-                # Initialize retain list
-                retain = []
-
-                # Find cases that were already processed or to be dropped
-                retained_cases = itf.flatten_list([[c for c in cds] for cds in cds_to_keep.values()])
-                processed_cases = retained_cases
-                processed_cases += drop_list
-
-                # Process cases where neither query nor subject were processed
-                if new_query not in processed_cases and new_id_subject not in processed_cases:
-                    cds_to_keep[class_].update([new_query, new_id_subject])
-                    retain = ['r', 'r']
-
-                # Process cases where only query was not processed
-                elif new_query not in processed_cases:
-                    cds_to_keep[class_].add(new_query)
-                    retain = ['r', 'ad' if new_id_subject in drop_list else 'ar']
-
-                # Process cases where only subject was not processed
-                elif new_id_subject not in processed_cases:
-                    cds_to_keep[class_].add(new_id_subject)
-                    retain = ['ad' if new_query in drop_list else 'ar', 'r']
-
-                if class_ in ['1b', '2a', '3a'] and retain:
-                    blastn_entry = matches[list(matches.keys())[0]]
-                    # Determine if the frequency of the query is greater than the subject.
-                    is_frequency_greater = blastn_entry['frequency_in_genomes_query_cds'] >= blastn_entry['frequency_in_genomes_subject_cds']
-                    # Determine if the query or subject should be dropped.
-                    query_or_subject = new_id_subject if is_frequency_greater else new_query
-                    # Position of the retain value in the list.
-                    retain_index = 1 if is_frequency_greater else 0
-                    # Choose the retain value based on the frequency of the query and subject and presence 
-                    retain_value = 'ar' if query_or_subject in retained_cases else 'ad' if query_or_subject in drop_list else 'd'
-                    
-                    retain[retain_index] = retain_value
-                    if retain_value != 'ar':
-                        drop_list.add(query_or_subject)
-                        cds_to_keep[class_].discard(query_or_subject)
-
-                # For the related_matches.tsv file.
-                if class_ not in ['4c','5'] and retain:
-                    strings = [new_query, class_, new_id_subject]
-                    found_key = find_key_for_strings([new_query, class_, new_id_subject], related_clusters)
-                    # Add asterisk to the query or subject that was dropped.
-                    if class_ in ['1b', '2a', '3a']:
-                        if query == query_or_subject:
-                            strings[0] + '*' 
-                        else:
-                            strings[1] + '*' 
-                    if not found_key:
-                        if not related_clusters:
-                            related_clusters[1] = [[new_query, class_, new_id_subject]]
-                        else:
-                            index = len(related_clusters) + 1
-                            related_clusters.setdefault(index, []).append([new_query, class_ , new_id_subject])
-                    else:
-                        related_clusters[found_key].append(strings)
-
-                if retain:
-                    important_relationships[class_].append(ids_for_relationship + [retain])
-
-                all_relationships[class_].append(ids_for_relationship)
-
     # Create the joined cluster by joining by IDs.
-    cds_to_keep['1a'] = {i: join for i, join in enumerate(cf.cluster_by_ids(cluster_to_join), 1)}
+    cds_to_keep['1a'] = {i: list_ for i, list_ in enumerate(cf.cluster_by_ids([v[0] for v in processed_results.values() if v[1] == '1a' and v[0]]), 1)}
+    for v in processed_results.values():
+        if v[1] != '1a':
+            cds_to_keep.setdefault(v[1], set()).update(v[0])
 
-    return cds_to_keep, important_relationships, drop_list, all_relationships, related_clusters
+    to_cluster_list = {i: cluster for i, cluster in enumerate(cf.cluster_by_ids([v[4] for v in processed_results.values() if v[1] not in ['4c','5']]))}
+    related_clusters = {}
+    for results in processed_results.values():
+        if results[1] not in ['4c','5']:
+            query_id = itf.search_string_by_regex(r'\((.*?)\)', results[5][0]) if all_alleles else results[5][0]
+            query_present = itf.identify_string_in_dict(query_id, to_cluster_list)
+
+            subject_id = itf.search_string_by_regex(r'\((.*?)\)', results[5][2]) if all_alleles else results[5][2]
+            subject_present = itf.identify_string_in_dict(subject_id, to_cluster_list)
+
+            if query_present or subject_present:
+                related_clusters.setdefault(query_present if query_present else subject_present, []).append(results[5] 
+                                                                                                            + 
+                                                                                                            [str(count_results_by_class[f"{results[4][0]}|{results[4][1]}"][results[1]])
+                                                                                                            +
+                                                                                                            '/'
+                                                                                                            + str(sum(count_results_by_class[f"{results[4][0]}|{results[4][1]}"].values()))])
+                                                                     
+    drop_set = set([v[3] for k, v in processed_results.items() if v[3]])
+
+    for k, v in processed_results.items():
+        if v[2][1]:
+            important_relationships.setdefault(v[1], []).append(v[2][0])
+        all_relationships.setdefault(v[1], []).append(v[2][0])
+    
+    return cds_to_keep, important_relationships, drop_set, all_relationships, related_clusters
+
+def write_blast_summary_results(related_clusters, count_results_by_class, results_output):
+    related_matches = os.path.join(results_output, "related_matches.tsv")
+    with open(related_matches, 'w') as related_matches_file:
+        for related in related_clusters.values():
+            for r in related:
+                related_matches_file.write('\t'.join(str(item) for item in r) + '\n')
+
+            related_matches_file.write('\n')
+
+    count_results_by_cluster = os.path.join(results_output, "count_results_by_cluster.tsv")
+    with open(count_results_by_cluster, 'w') as count_results_by_cluster_file:
+        for id_, classes in count_results_by_class.items():
+            count_results_by_cluster_file.write('\t'.join(id_.split('|')))
+            total_count = sum(classes.values())
+            for i, items in enumerate(classes.items()):
+                if i == 0:
+                    count_results_by_cluster_file.write(f"\t{items[0]}\t{items[1]}\{total_count}\n")
+                else:
+                    count_results_by_cluster_file.write(f"\t\t{items[0]}\t{items[1]}\{total_count}\n")
+            count_results_by_cluster_file.write('\n')
+
+def get_loci_matches(all_relationships, loci_ids, cds_to_keep, schema_loci_short, cds_joined_cluster, sorted_blast_dict):
+    if not all(loci_ids):
+        relationships = itf.flatten_list(all_relationships.values())
+        is_matched = {}
+        is_matched_alleles = None
+        for class_, entries in list(cds_to_keep.items()):
+            for entry in list(entries):
+                if entry not in schema_loci_short:
+                    if type(entry) == int:
+                        id_ = entry
+                        entry = cds_joined_cluster[entry]
+                    else:
+                        id_ = entry
+                        entry = [entry]
+                    is_matched.setdefault(id_, set([itf.remove_by_regex(i[0], '_(\d+)') for i in relationships if i[1] in entry]))
+    else:
+        relationships = itf.flatten_list(all_relationships.values())
+        changed_ids = [[r[0], itf.remove_by_regex(r[1], '_(\d+)')] for r in relationships]
+        had_matches = set([itf.remove_by_regex(rep, '_(\d+)') for rep in sorted_blast_dict])
+        is_matched = {}
+        is_matched_alleles = {}
+        for class_, entries in list(cds_to_keep.items()):
+            for entry in list(entries):
+                if entry not in had_matches and type(entry) != int:
+                    id_ = entry
+                    entry = [entry]
+                    is_matched.setdefault(id_, set([i[0] for i in changed_ids if i[1] in entry]))
+                    is_matched_alleles.setdefault(id_, set([i[1] 
+                                                            for i in relationships 
+                                                            if i[0] in is_matched[id_] 
+                                                            and itf.remove_by_regex(i[1], '_(\d+)') in entry]))
+    return is_matched, is_matched_alleles
 
 def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path, 
-                          constants, drop_list, loci, groups_paths_old, frequency_in_genomes,
+                          constants, drop_set, loci, groups_paths_old, frequency_in_genomes,
                           only_loci):
     """
     This function wraps up the results for processing of the unclassified CDSs
@@ -647,7 +790,7 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
         Path to were write the FASTA files.
     constants : list
         Contains the constants to be used in this function.
-    drop_list : list
+    drop_set : set
         Contains the CDS IDs to be removed from further processing for appearing
         fewer time in genomes than their match.
     loci : dict
@@ -828,21 +971,21 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
                 cds = [cds]
             else:
                 cds = cds_to_keep[class_][cds]
+            # Write all of the alleles to the file.
             with open(cds_group_fasta_file, 'w') as fasta_file:
                 for rep_id in cds:
                     cds_ids = [cds_id for cds_id in clusters[rep_id]]
                     for cds_id in cds_ids:
-                        fasta_file.writelines(f">{cds_id}\n")
-                        fasta_file.writelines(str(not_included_cds[cds_id])+"\n")
+                        fasta_file.write(f">{cds_id}\n{str(not_included_cds[cds_id])}\n")
+            # Write only the representative to the file.
             with open(cds_group_reps_file, 'w') as fasta_file:
                 for rep_id in cds:
-                    fasta_file.writelines(f">{rep_id}\n")
-                    fasta_file.writelines(str(not_included_cds[rep_id])+"\n")
+                    fasta_file.write(f">{rep_id}\n{str(not_included_cds[rep_id])}\n")
+            # Write the representative to the master file.
             write_type = 'a' if os.path.exists(master_file_rep) else 'w'
             with open(master_file_rep, write_type) as fasta_file:
                 for rep_id in cds:
-                    fasta_file.writelines(f">{rep_id}\n")
-                    fasta_file.writelines(str(not_included_cds[rep_id])+"\n")
+                    fasta_file.write(f">{rep_id}\n{str(not_included_cds[rep_id])}\n")
 
     def translate_possible_new_loci(fasta_folder, groups_paths, groups_paths_reps, constants):
         """
@@ -975,9 +1118,9 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
                 loci_cases[class_] = [cds for cds in cds_set if cds in loci]
                 cds_cases[class_] = [cds for cds in cds_set if cds not in loci]
 
-        # Process drop_list in the same way as above
-        loci_cases['dropped'] = [d for d in drop_list if d in loci]
-        cds_cases['dropped'] = [d for d in drop_list if d not in loci]
+        # Process drop_set in the same way as above
+        loci_cases['dropped'] = [d for d in drop_set if d in loci]
+        cds_cases['dropped'] = [d for d in drop_set if d not in loci]
 
     else:
         for class_, cds_set in cds_to_keep.items():
@@ -991,8 +1134,13 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
         for i, printout in enumerate([cds_cases, loci_cases]):
             if only_loci and i == 0:
                 continue
+            total_loci = len(itf.flatten_list([i 
+                                               for class_, i
+                                               in printout.items()
+                                               if class_ != '1a'])) + len(itf.flatten_list(cds_to_keep['1a'].values()))
+
             print(f"Out of {len(groups_paths_old) if i==0 else len(loci)} {'CDSs groups' if i == 0 else 'loci'}:")
-            print(f"\t{len(itf.flatten_list(printout.values()))} {'CDSs' if i == 0 else 'loci'}"
+            print(f"\t{total_loci} {'CDSs' if i == 0 else 'loci'}"
                 f" representatives had matches with BLASTn against the {'schema' if i == 0 else 'CDSs'}.")
 
             # Print the classification results
@@ -1005,14 +1153,14 @@ def wrap_up_blast_results(cds_to_keep, not_included_cds, clusters, output_path,
     else:
         # Write info about the classification results.
         print(f"Out of {len(clusters)} clusters:")
-        print(f"\t{sum(count_cases.values()) + len(drop_list)} CDS representatives had matches with BLASTn"
+        print(f"\t{sum(count_cases.values()) + len(drop_set)} CDS representatives had matches with BLASTn"
             f" which resulted in {len(itf.flatten_list(cds_to_keep.values()))} groups")
 
         # Print the classification results
         for class_, count in count_cases.items():
             print_classification_results(class_, count, cds_to_keep, 0)
 
-        print(f"\t\tOut of those {len(drop_list)} CDSs groups were removed from the analysis.")
+        print(f"\t\tOut of those {len(drop_set)} CDSs groups were removed from the analysis.")
 
         if Retained_not_matched_by_blastn:
             print(f"\t{len(Retained_not_matched_by_blastn)} didn't have any BLASTn matches so they were retained.")
@@ -1780,61 +1928,29 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
     alignment_dict_to_file(representative_blast_results, report_file_path, 'w', True)
     
     print("\nProcessing classes...")
+    sorted_blast_dict = sort_blast_results_by_classes(representative_blast_results, classes_outcome)
     # Process the results_outcome dict and write individual classes to TSV file.
-    [cds_to_keep, important_relationships, drop_list, all_relationships, related_clusters] = process_classes(representative_blast_results,
-                                                                                                            classes_outcome,
-                                                                                                            all_alleles)
-    related_matches = os.path.join(results_output, "related_matches.tsv")
-    with open(related_matches, 'w') as related_matches_file:
-        for related in related_clusters.values():
-            for r in related:
-                related_matches_file.write('\t'.join(str(item) for item in r) + '\n')
+    processed_results, count_results_by_class = process_classes(sorted_blast_dict,
+                                                                classes_outcome,
+                                                                all_alleles)
+    [cds_to_keep,
+     important_relationships,
+     drop_set, all_relationships,
+     related_clusters]  = extract_results(processed_results, count_results_by_class, all_alleles, classes_outcome)
 
-            related_matches_file.write('\n')
-    
-    # Filter repeated entries
-    seen = set()
-    for class_, entries in list(cds_to_keep.items()):
-        for entry in list(entries):
-            if entry not in seen:
-                seen.add(entry)
-            else:
-                cds_to_keep[class_].remove(entry)
+    write_blast_summary_results(related_clusters, count_results_by_class, results_output)
+
     # Get all of the CDS that matched with loci
-    if not all(loci_ids):
-        relationships = itf.flatten_list(all_relationships.values())
-        is_matched = {}
-        is_matched_alleles = None
-        for class_, entries in list(cds_to_keep.items()):
-            for entry in list(entries):
-                if entry not in schema_loci_short:
-                    if type(entry) == int:
-                        id_ = entry
-                        entry = cds_joined_cluster[entry]
-                    else:
-                        id_ = entry
-                        entry = [entry]
-                    is_matched.setdefault(id_, set([itf.remove_by_regex(i[0], '_(\d+)') for i in relationships if i[1] in entry]))
-    else:
-        relationships = itf.flatten_list(all_relationships.values())
-        changed_ids = [[r[0], itf.remove_by_regex(r[1], '_(\d+)')] for r in relationships]
-        had_matches = set([itf.remove_by_regex(rep, '_(\d+)') for rep in representative_blast_results])
-        is_matched = {}
-        is_matched_alleles = {}
-        for class_, entries in list(cds_to_keep.items()):
-            for entry in list(entries):
-                if entry not in had_matches and type(entry) != int:
-                    id_ = entry
-                    entry = [entry]
-                    is_matched.setdefault(id_, set([i[0] for i in changed_ids if i[1] in entry]))
-                    is_matched_alleles.setdefault(id_, set([i[1] 
-                                                            for i in relationships 
-                                                            if i[0] in is_matched[id_] 
-                                                            and itf.remove_by_regex(i[1], '_(\d+)') in entry]))
+    [is_matched, is_matched_alleles] = get_loci_matches(all_relationships,
+                                                        loci_ids,
+                                                        cds_to_keep,
+                                                        schema_loci_short,
+                                                        cds_joined_cluster,
+                                                        sorted_blast_dict)
 
     print("\nWritting classes results to files...")
     write_processed_results_to_file(cds_to_keep,
-                                    representative_blast_results,
+                                    sorted_blast_dict,
                                     classes_outcome,
                                     all_alleles,
                                     is_matched,
@@ -1844,7 +1960,7 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
     print("\nWrapping up BLAST results...")
     
     report_main_relationships(important_relationships,
-                              representative_blast_results,
+                              sorted_blast_dict,
                               all_alleles,
                               True,
                               results_output)
@@ -1854,10 +1970,10 @@ def process_schema(schema, groups_paths, results_output, reps_trans_dict_cds,
                         all_alleles,
                         results_output,
                         constants,
-                        drop_list,
+                        drop_set,
                         schema_loci,
                         groups_paths,
                         frequency_in_genomes,
                         all(loci_ids))
 
-    return representative_blast_results
+    return sorted_blast_dict
