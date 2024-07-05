@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import re
 import itertools
 import pickle
@@ -500,6 +501,39 @@ def remove_by_regex(string, pattern):
     """
     return re.sub(pattern, '', string)
 
+def replace_by_regex(string, pattern, replacement):
+    """
+    Replace all occurrences of a regex pattern within a string with a specified replacement.
+
+    This function uses the `re.sub()` method from Python's built-in `re` (regular expressions) module to find all
+    occurrences of `pattern` in `string` and replace them with `replacement`. The function returns a new string
+    with the modifications applied.
+
+    Parameters
+    ----------
+    string : str
+        The string to search and replace occurrences in.
+    pattern : str
+        The regex pattern to search for within `string`. This pattern can match characters, numbers, symbols,
+        or more complex regex features.
+    replacement : str
+        The string to replace each match of `pattern` in `string` with.
+
+    Returns
+    -------
+    str
+        A new string with all matches of `pattern` replaced by `replacement`.
+
+    Examples
+    --------
+    >>> text = "Hello 123, meet 456."
+    >>> pattern = r"\d+"
+    >>> replacement = "number"
+    >>> replace_by_regex(text, pattern, replacement)
+    'Hello number, meet number.'
+    """
+    return re.sub(pattern, replacement, string)
+
 def regex_present(regex_list, string):
     """
     Check if any regex in a list is found in a string.
@@ -574,8 +608,29 @@ def find_index(input_list, target_string):
         return input_list.index(target_string)
     except ValueError:
         return None
-    
-def convert_to_type(value, target_type):
+
+def find_sublist_index(input_list_of_lists, target_value):
+    """
+    Finds the index of the sublist that contains the target value within a list of lists.
+
+    Parameters
+    ----------
+    input_list_of_lists : list of list
+        The list of lists to search.
+    target_value : any
+        The value to find.
+
+    Returns
+    -------
+    return : int or None
+        The index of the sublist containing the element, or None if the string is not found in any sublist.
+    """
+    try:
+        return input_list_of_lists.index(target_value)
+    except ValueError:
+        return None
+
+def try_convert_to_type(value, target_type):
     """
     Attempts to convert a given value to a specified type.
 
@@ -602,3 +657,65 @@ def convert_to_type(value, target_type):
         return target_type(value)
     except (ValueError, TypeError):
         return value
+#Unused
+def repeat_strings_in_a_list(string, times):
+    """
+    Creates a list where a given character is repeated a specified number of times.
+
+    Parameters
+    ----------
+    string : str
+        The character to be repeated.
+    times : int
+        The number of times the character should be repeated.
+
+    Returns
+    -------
+    list of str
+        A list containing the character repeated 'times' times.
+
+    Examples
+    --------
+    >>> repeat_strings_in_a_list('a', 3)
+    ['a', 'a', 'a']
+    """
+    return [string for i in range(times)]
+
+def sort_subdict_by_tuple(dict, order):
+    """
+    Sorts the sub-dictionaries of a given dictionary based on a specified order tuple.
+
+    Parameters
+    ----------
+    dict : dict
+        The input dictionary containing sub-dictionaries as values.
+    order : tuple
+        A tuple specifying the desired order of keys in the sorted sub-dictionaries.
+
+    Returns
+    -------
+    sorted_data : dict
+        A new dictionary with each sub-dictionary sorted according to the specified order.
+
+    Notes
+    -----
+    -This function iterates through each key-value pair in the input dictionary. Each value, 
+    which should be a dictionary itself (sub-dictionary), is sorted based on the order of keys 
+    specified in the 'order' tuple. If a key in the sub-dictionary does not exist in the 'order' tuple, 
+    it is placed at the end of the sorted sub-dictionary. The sorting is stable, meaning that 
+    the original order of keys (for those not in the 'order' tuple) is preserved.
+
+    Examples
+    --------
+    >>> data = {'cds1|cds2': {'1a': 30, '3b': 40}, 'cds3|cds4': {'3b': 20, '1a': 30}}
+    >>> order = ('1a', '1b', '2a', '3a', '2b', '1c', '3b', '4a', '4b', '4c', '5')
+    >>> sorted_data = sort_subdict_by_tuple(data, order)
+    >>> sorted_data
+    {'cds1|cds2': OrderedDict([('1a', 30), ('3b', 40)]), 'cds3|cds4': OrderedDict([('1a', 30), ('3b', 20)])}
+    """
+    sorted_data = {}
+    for key, subdict in dict.items():
+        # Sorting the sub-dictionary by the index of its keys in the order tuple
+        sorted_subdict = OrderedDict(sorted(subdict.items(), key=lambda item: order.index(item[0]) if item[0] in order else len(order)))
+        sorted_data[key] = sorted_subdict
+    return sorted_data
