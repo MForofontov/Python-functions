@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict, Counter
 import re
 import itertools
 import pickle
@@ -313,7 +313,7 @@ def partially_contains_sublist(main_list, list_of_lists):
     return False
 
 
-def identify_string_in_dict(input_str, dictionary):
+def identify_string_in_dict_get_key(input_str, dictionary):
     """
     Identify the key in the dictionary where the input string is present.
 
@@ -332,6 +332,12 @@ def identify_string_in_dict(input_str, dictionary):
     for key, value in dictionary.items():
         if input_str in value:
             return key
+    return None
+
+def identify_string_in_dict_get_value(search_key, search_dict):
+    for key, value in search_dict.items():
+        if search_key in value:
+            return value
     return None
 
 def identify_string_in_dict_lists_regex(target_value, dict_of_lists, regex=False):
@@ -719,3 +725,65 @@ def sort_subdict_by_tuple(dict, order):
         sorted_subdict = OrderedDict(sorted(subdict.items(), key=lambda item: order.index(item[0]) if item[0] in order else len(order)))
         sorted_data[key] = sorted_subdict
     return sorted_data
+
+def check_if_all_elements_are_duplicates(input_list):
+    # Count occurrences of each element
+    element_counts = {}
+    for element in input_list:
+        if element in element_counts:
+            element_counts[element] += 1
+        else:
+            element_counts[element] = 1
+    
+    # Check if every element occurs more than once
+    for count in element_counts.values():
+        if count == 1:
+            return False
+    return True if element_counts else False
+
+def check_if_all_sets_are_same(sets_list):
+    """
+    Checks if all sets within a list are identical.
+
+    This function evaluates whether all sets in a given list are exactly the same. It first checks if the list is empty or contains only one set, in which case it returns True, as there are no differing sets to compare. Then, it uses the first set in the list as a reference to compare against all other sets in the list. If any set differs from the first set, the function returns False. Otherwise, if all sets are identical to the first set, it returns True.
+
+    Parameters
+    ----------
+    sets_list : list
+        A list of sets to be checked for identity.
+
+    Returns
+    -------
+    bool
+        True if all sets in the list are identical, False otherwise.
+
+    Examples
+    --------
+    >>> sets_list = [{1, 2, 3}, {1, 2, 3}, {1, 2, 3}]
+    >>> check_if_all_sets_are_same(sets_list)
+    True
+
+    >>> sets_list2 = [{1, 2, 3}, {4, 5, 6}, {1, 2, 3}]
+    >>> check_if_all_sets_are_same(sets_list2)
+    False
+    """
+    # Check if the list is empty or has only one set
+    if len(sets_list) <= 1:
+        return True
+    
+    # Use the first set as a reference
+    reference_set = sets_list[0]
+    
+    # Compare each set with the reference set
+    for s in sets_list[1:]:
+        if s != reference_set:
+            return False
+    
+    return True
+
+def get_duplicates(input_list):
+    # Count occurrences of each element
+    element_counts = Counter(input_list)
+    # Select elements that appear more than once
+    duplicates = [element for element, count in element_counts.items() if count > 1]
+    return duplicates
