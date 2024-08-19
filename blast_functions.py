@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-def make_blast_db(makeblastdb_exec ,input_fasta, output_path, db_type):
+def make_blast_db(makeblastdb_exec, input_fasta, output_path, db_type):
     """
     Create a BLAST database.
 
@@ -69,7 +69,6 @@ def run_blast(blast_path, blast_db, fasta_file, blast_output,
     stderr : list
         List with the warnings/errors reported by BLAST.
     """
-
     blast_args = [blast_path, '-db', blast_db, '-query', fasta_file,
                   '-out', blast_output, '-outfmt', '6 qseqid sseqid score',
                   '-max_hsps', str(max_hsps), '-num_threads', str(threads),
@@ -122,6 +121,8 @@ def run_blast_fastas_multiprocessing(id_, blast_exec, blast_results,
     ----------
     id : str
         id of the locus that will be blasted against all of the representatives sequences.
+    blast_exec : str
+        Path to the BLAST executable.
     blast_results_all_representatives : str
         Path to the folder were to store blast results.
     representative_file_dict : dict
