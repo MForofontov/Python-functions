@@ -763,11 +763,11 @@ def process_classes(representative_blast_results, classes_outcome, all_alleles =
             strings = [str(query), str(id_subject), class_]
             if all_alleles:
                 replaced_query = itf.identify_string_in_dict_get_key(query, all_alleles)
-                if replaced_query:
+                if replaced_query is not None:
                     new_query = replaced_query
                     strings[0] = new_query
                 replaced_id_subject = itf.identify_string_in_dict_get_key(id_subject, all_alleles)
-                if replaced_id_subject:
+                if replaced_id_subject is not None:
                     new_id_subject = replaced_id_subject
                     strings[1] = new_id_subject
 
@@ -1053,32 +1053,37 @@ def extract_results(processed_results, count_results_by_class, frequency_in_geno
             reverse_results = processed_results[reverse_id] if processed_results.get(reverse_id) else None
             if reverse_results and classes_outcome.index(results[0]) > classes_outcome.index(reverse_results[0]):
                 results = reverse_results
-
+            # Process the joined cases
             if results[0] == '1a':
+                # If it is part of a joined cluster, add to the recommendations
                 if joined_query_id is not None:
                     add_to_recommendations('Joined', joined_query_to_write, joined_query_id)
                 if joined_subject_id is not None:
                     add_to_recommendations('Joined', joined_subject_to_write, joined_subject_id)
-
+            # Process the choice cases
             elif results[0] in ['1c', '2b', '3b', '4b']:
+                # If it is not dropped and not the same joined cluster, add to the recommendations
                 if not if_query_dropped and not if_subject_dropped and not if_same_joined:
                     add_to_recommendations('Choice', query_to_write, choice_query_id)
                     add_to_recommendations('Choice', subject_to_write, choice_subject_id)
-                elif if_query_dropped:
-                    add_to_recommendations('Choice', subject_to_write, choice_subject_id)
-                    matched_with_dropped.setdefault(key, []).append([query_to_write, subject_to_write, query_to_write, choice_query_id])
-                elif if_subject_dropped:
-                    add_to_recommendations('Choice', query_to_write, choice_query_id)
-                    matched_with_dropped.setdefault(key, []).append([query_to_write, subject_to_write, subject_to_write, choice_query_id])
+                # elif if_query_dropped:
+                #     add_to_recommendations('Choice', subject_to_write, choice_subject_id)
+                #     matched_with_dropped.setdefault(key, []).append([query_to_write, subject_to_write, query_to_write, choice_query_id])
+                # elif if_subject_dropped:
+                #     add_to_recommendations('Choice', query_to_write, choice_query_id)
+                #     matched_with_dropped.setdefault(key, []).append([query_to_write, subject_to_write, subject_to_write, choice_query_id])
+            # Process cases where some ID is dropped
             elif results[0] in ['1b', '2a', '3a', '4a']:
+                # If it is part of a joined cluster and it gets dropped, add to the recommendations
                 if (joined_query_id and '*' in results[4][0]) or (joined_subject_id and '*' in results[4][1]):
                     add_to_recommendations('Choice', query_to_write, choice_query_id)
                     add_to_recommendations('Choice', subject_to_write, choice_subject_id)
+                # If it is not part of a joined cluster and it gets dropped, add to the recommendations
                 if query_id in drop_possible_loci:
                     if not if_joined_query and not if_query_in_choice:
                         add_to_recommendations('Drop', query_to_write)
                         dropped_match.setdefault(key, []).append([query_to_write, subject_to_write, subject_to_write])
-
+                # If it is not part of a joined cluster and it gets dropped, add to the recommendations
                 elif subject_id in drop_possible_loci:
                     if not if_joined_subject and not if_subject_in_choice:
                         add_to_recommendations('Drop', subject_to_write)
@@ -1099,7 +1104,7 @@ def extract_results(processed_results, count_results_by_class, frequency_in_geno
     return related_clusters, recommendations
 
 def write_blast_summary_results(related_clusters, count_results_by_class, group_reps_ids, group_alleles_ids,
-                                frequency_in_genomes, recommendations, reverse_matches, results_output):
+                                frequency_in_genomes, recommendations, reverse_matches, classes_outcome, results_output):
     """
     Writes summary results of BLAST analysis to TSV files.
 
@@ -1139,6 +1144,7 @@ def write_blast_summary_results(related_clusters, count_results_by_class, group_
       and total count of results for the cluster, with each piece of information separated by tabs.
       A blank line is added after each cluster's information.
     """
+    # Add the reverse matches to the related clusters
     reported_cases = {}
     for key, related in list(related_clusters.items()):
         for index, r in enumerate(list(related)):
@@ -1146,6 +1152,16 @@ def write_blast_summary_results(related_clusters, count_results_by_class, group_
                 r.insert(4, '-')
                 r.insert(5, '-')
             [query, subject] = [itf.remove_by_regex(i, r"\*") for i in r[:2]]
+            
+            # Add the total count of the representatives and allelesidentify_problematic_new_loci
+            representatives_count_query = len(group_reps_ids[query])
+            representatives_count_subject = f"{len(group_reps_ids[subject])}" if reverse_matches else "|-"
+            allele_count_query = f"{len(group_alleles_ids[query])}" if reverse_matches else "-"
+            allele_count_subject = f"{len(group_alleles_ids[subject])}"
+            representatives_count = f"{representatives_count_query}|{representatives_count_subject}"
+            allele_count = f"{allele_count_query}|{allele_count_subject}"
+            
+            r.extend([representatives_count, allele_count])
             if (query, subject) not in itf.flatten_list(reported_cases.values()):
                 reported_cases.setdefault(key, []).append((subject, query))
             elif reverse_matches:
@@ -1155,26 +1171,39 @@ def write_blast_summary_results(related_clusters, count_results_by_class, group_
                 insert = r[3] if not None else '-'
                 related[sublist_index][5] = insert
                 related.remove(r)
-        
-        for index, i in enumerate(recommendations[key]):
-            related_clusters[key][index] += ([itf.flatten_list([[k] + [i for i in v]]) for k , v in recommendations[key].items()][index])
+
+    # Write the recommendations to the output file
+    recommendations_file = os.path.join(results_output, "recommendations.tsv")
+    with open(recommendations_file, 'w') as recommendations_report_file:
+        recommendations_report_file.write("Cluster\tRecommendation\tID\n")
+        for key, recommendation in recommendations.items():
+            for category, ids in recommendation.items():
+                category = category.split('_')[0] if 'Choice' in category else category
+                recommendations_report_file.write(f"{key}\t{category}\t{','.join(ids)}\n")
+            recommendations_report_file.write("#\n")
+
     # Write the results to the output files
     related_matches = os.path.join(results_output, "related_matches.tsv")
     with open(related_matches, 'w') as related_matches_file:
         related_matches_file.write("Query\tSubject\tClass\tClass_count" +
                                     ("\tInverse_class\tInverse_class_count" if reverse_matches else "") +
-                                    "\tFrequency_in_genomes_query\tFrequency_in_genomes_subject\n")
+                                    "\tFrequency_in_genomes_query\tFrequency_in_genomes_subject"
+                                    "\tRepresentatives_count\tAlelles_count\n")
         for related in related_clusters.values():
             for r in related:
                 related_matches_file.write('\t'.join(str(item) for item in r) + '\n')
 
             related_matches_file.write('#\n')
-
+    # Write the count results to the output file
+    tab = '\t'
     count_results_by_cluster = os.path.join(results_output, "count_results_by_cluster.tsv")
     with open(count_results_by_cluster, 'w') as count_results_by_cluster_file:
-        count_results_by_cluster_file.write("Query\tSubject\tClass\tClass_count\tInverse_class_count"
+        count_results_by_cluster_file.write("Query"
+                                            "\tSubject"
+                                            f"\t{tab.join(classes_outcome)}"
                                             "\tRepresentatives_count"
-                                            "\tAlelles_count\tFrequency_in_genomes_query"
+                                            "\tAlelles_count"
+                                            "\tFrequency_in_genomes_query"
                                             "\tFrequency_in_genomes_subject\n")
         for id_, classes in count_results_by_class.items():
             query, subject = id_.split('|')
@@ -1183,24 +1212,28 @@ def write_blast_summary_results(related_clusters, count_results_by_class, group_
             total_count_inverse = sum([i[1] for i in classes.values() if i[1] != '-'])
             query = itf.try_convert_to_type(id_.split('|')[0], int)
             subject = itf.try_convert_to_type(id_.split('|')[1], int)
+            
+            representatives_count_query = len(group_reps_ids[query])
+            representatives_count_subject = f"{len(group_reps_ids[subject])}" if reverse_matches else "|-"
+            allele_count_query = f"{len(group_alleles_ids[query])}" if reverse_matches else "-"
+            allele_count_subject = f"{len(group_alleles_ids[subject])}"
+            representatives_count = f"{representatives_count_query}|{representatives_count_subject}"
+            allele_count = f"{allele_count_query}|{allele_count_subject}"
+            
+            query_frequency = frequency_in_genomes[query]
+            subject_frequency = frequency_in_genomes[subject]
 
-            for i, items in enumerate(classes.items()):
-                if i == 0:
-                    count_results_by_cluster_file.write('\t'.join([f"\t{items[0]}",
-                                                        f"{items[1][0]}/{total_count_origin}",
-                                                        f"{items[1][1]}/{total_count_inverse}" if reverse_matches else "-",
-                                                        (f"{len(group_reps_ids[query])}") + 
-                                                        (f"|{len(group_reps_ids[subject])}" if reverse_matches else "|-"),
-                                                        (f"{len(group_alleles_ids[query])}" if reverse_matches else "-") +
-                                                        (f"|{len(group_alleles_ids[subject])}"),
-                                                        f"{frequency_in_genomes[query]}",
-                                                        f"{frequency_in_genomes[subject]}\n"]))
+            for class_outcome in classes_outcome:
+                class_value = classes.get(class_outcome, '-')
+                if class_value == '-':
+                    count_results_by_cluster_file.write(f"\t{class_value}")
                 else:
-                    count_results_by_cluster_file.write('\t'.join([f"\t\t{items[0]}",
-                                                        f"{items[1][0]}/{total_count_origin}",
-                                                        f"{items[1][1]}/{total_count_inverse}" if reverse_matches else "-",
-                                                        "\n"]))
-            count_results_by_cluster_file.write('\n')
+                    query_class_count = class_value[0] if class_value[0] != '-' else '-'
+                    subject_class_count = class_value[1] if class_value[1] != '-' else '-'
+                    count_results_by_cluster_file.write(f"\t{query_class_count}|{total_count_origin}|{subject_class_count}|{total_count_inverse}")
+
+            count_results_by_cluster_file.write(f"\t{representatives_count}\t{allele_count}\t{query_frequency}\t{subject_frequency}\n")
+            count_results_by_cluster_file.write('\n#')
 
 def get_matches(all_relationships, clusters_to_keep, sorted_blast_dict):
     """
@@ -1291,7 +1324,7 @@ def write_temp_loci(clusters_to_keep, not_included_cds, clusters, output_path):
     frequency_in_genomes : dict
         Dict that contains sum of frequency of that representatives cluster in the
         genomes of the schema.
-    run_type : list
+    run_mode : str
         What type of run to make.
 
     Returns
@@ -1371,7 +1404,7 @@ def write_temp_loci(clusters_to_keep, not_included_cds, clusters, output_path):
     return temp_fastas_paths
 
 def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
-               rep_paths_nuc, output_dir, constants, cpu, multi_fasta, run_type):
+               rep_paths_nuc, output_dir, constants, cpu, multi_fasta, run_mode):
     """
     This functions runs both BLASTn and Subsequently BLASTp based on results of
     BLASTn.
@@ -1395,8 +1428,8 @@ def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
     multi_fasta : dict
        A dictionary used when the input FASTA files contain multiple CDSs, to ensure correct BLASTn
        execution.
-    run_type : str
-        A flag indicating what type of run to perform, can be cds_vs_cds, loci_vs_cds or loci_vs_loci.
+    run_mode : str
+        A flag indicating what mode of run to perform, can be cds_vs_cds, loci_vs_cds or loci_vs_loci.
         
     Returns
     -------
@@ -1413,8 +1446,8 @@ def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
         processed in this function.
     """
     
-    print("\nRunning BLASTn between cluster representatives vs cluster alleles..." if run_type == 'cds_vs_cds' else
-          "\nRunning BLASTn between Schema representatives CDS clusters..." if run_type == 'loci_vs_cds' else
+    print("\nRunning BLASTn between cluster representatives vs cluster alleles..." if run_mode == 'cds_vs_cds' else
+          "\nRunning BLASTn between Schema representatives CDS clusters..." if run_mode == 'loci_vs_cds' else
           "\nRunning BLASTn between loci representatives against schema loci...")
     # BLASTn folder
     blastn_output = os.path.join(output_dir, '1_BLASTn_processing')
@@ -1488,7 +1521,7 @@ def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
     for query_id, subjects_ids in blastp_runs_to_do.items():
         
         filename = itf.identify_string_in_dict_get_key(query_id, multi_fasta)
-        if filename:
+        if filename is not None:
             blasts_to_run.setdefault(filename, set()).update(subjects_ids)
             seen_entries[filename] = set()
         else:
@@ -1537,9 +1570,6 @@ def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
     # If there is need to calculate self-score
     print("\nCalculate self-score for the CDSs...")
     self_score_dict = {}
-    for query in rep_paths_prot:
-        # For self-score
-        self_score_dict[query] = {}
     # Get Path to the blastp executable
     get_blastp_exec = lf.get_tool_path('blastp')
     i = 1
@@ -1561,8 +1591,8 @@ def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
     # Print newline
     print('\n')  
     
-    print("Running BLASTp for representatives against cluster alleles..." if run_type == 'cds_vs_cds'
-          else "Running BLASTp of schema representatives against cluster alleles..." if run_type == 'loci_vs_cds'
+    print("Running BLASTp for representatives against cluster alleles..." if run_mode == 'cds_vs_cds'
+          else "Running BLASTp of schema representatives against cluster alleles..." if run_mode == 'loci_vs_cds'
           else "Running BLASTp for schema representatives against schema alleles")
     # Run BLASTp between all BLASTn matches (rep vs all its BLASTn matches)  .      
     i = 1
@@ -1591,7 +1621,7 @@ def run_blasts(blast_db, cds_to_blast, reps_translation_dict,
 
 def write_processed_results_to_file(clusters_to_keep, representative_blast_results,
                                     classes_outcome, all_alleles, alleles, is_matched,
-                                    is_matched_alleles, all_loci, output_path):
+                                    is_matched_alleles, output_path):
     """
     Write processed results to files in specified output directories.
 
@@ -1611,8 +1641,6 @@ def write_processed_results_to_file(clusters_to_keep, representative_blast_resul
         Dictionary indicating if clusters are matched.
     is_matched_alleles : dict
         Dictionary containing matched alleles information.
-    all_loci : bool
-        Boolean indicating if all loci should be processed.
     output_path : str
         Path to the output directory where results will be written.
 
@@ -1863,7 +1891,7 @@ def create_graphs(file_path, output_path, filename, other_plots = None):
 
     gf.save_plots_to_html([violinplot1, violinplot2] + extra_plot, results_output, filename)
 
-def print_classifications_results(clusters_to_keep, drop_possible_loci, groups_paths_old, clusters, loci, run_type):
+def print_classifications_results(clusters_to_keep, drop_possible_loci, groups_paths_old, clusters, loci, run_mode):
     """
     Prints the classification results based on the provided parameters.
 
@@ -1880,15 +1908,12 @@ def print_classifications_results(clusters_to_keep, drop_possible_loci, groups_p
         The dictionary containing the clusters.
     loci : bool
         If True, the analysis is based on loci.
-    run_type : str
-        The type of run, e.g., 'loci_vs_loci'.
+    run_mode : str
+        The mode of run, e.g., 'loci_vs_loci'.
 
     Returns
     -------
-    cds_cases: dict
-        Dictionary with CDS cases classified by their class type.
-    loci_cases: dict
-        Dictionary with loci cases classified by their class type.
+    None, prints in stdout
     """
     def print_results(class_, count, printout, i):
         """
@@ -1918,7 +1943,7 @@ def print_classifications_results(clusters_to_keep, drop_possible_loci, groups_p
                 print(f"\t\tOut of those groups, {count} {'CDSs groups' if i == 0 else 'loci'} are classified as {class_}"
                     f" and are contained in {len(printout['1a'])} joined groups that were retained.")
             elif class_ == 'dropped':
-                if run_type == 'loci_vs_loci':
+                if run_mode == 'loci_vs_loci':
                     print(f"\t\tOut of those {count} loci are recommended to be removed.")
                 else:
                     print(f"\t\tOut of those {count} {'CDSs groups' if i== 0 else 'loci'}"
@@ -1966,7 +1991,7 @@ def print_classifications_results(clusters_to_keep, drop_possible_loci, groups_p
     # Check if loci is not empty
     if loci:
         for i, printout in enumerate([cds_cases, loci_cases]):
-            if run_type == 'loci_vs_loci' and i == 0:
+            if run_mode == 'loci_vs_loci' and i == 0:
                 continue
             total_loci = len(itf.flatten_list([i 
                                                for class_, i
@@ -2001,4 +2026,94 @@ def print_classifications_results(clusters_to_keep, drop_possible_loci, groups_p
             
             clusters_to_keep['Retained_not_matched_by_blastn'] = Retained_not_matched_by_blastn
 
-    return cds_cases, loci_cases
+def process_new_loci(fastas_folder, allelecall_directory, constants):
+    new_loci_folder = os.path.join(fastas_folder, 'new_possible_loci_fastas')
+    possible_new_loci = {fastafile: os.path.join(new_loci_folder, fastafile) for fastafile in os.listdir(new_loci_folder) if fastafile.endswith('.fasta')}
+    possible_new_loci_short_dir = os.path.join(new_loci_folder, 'short')
+    possible_new_loci_short = {fastafile: os.path.join(possible_new_loci_short_dir, fastafile) for fastafile in os.listdir(possible_new_loci_short_dir) if fastafile.endswith('.fasta')}
+    master_file_path = os.path.join(fastas_folder, 'master.fasta')
+    possible_new_loci_translation_folder = os.path.join(fastas_folder, 'possible_new_loci_translation_folder')
+    ff.create_directory(possible_new_loci_translation_folder)
+
+    alleles = {}
+    translation_dict_possible_new_loci = {}
+    frequency_in_genomes = {}
+    temp_frequency_in_genomes = {}
+    cds_present = os.path.join(allelecall_directory, "temp")
+    decoded_sequences_ids = itf.decode_CDS_sequences_ids(cds_present)
+    for new_loci in possible_new_loci.values():
+        loci_id = ff.file_basename(new_loci).split('.')[0]
+        alleles.setdefault(loci_id, {})
+        fasta_dict = sf.fetch_fasta_dict(new_loci, False)
+        os.remove(new_loci)
+        for allele_id, sequence in fasta_dict.items():
+            new_allele_id = f"{loci_id}_{allele_id}"
+            alleles.setdefault(loci_id, {}).update({new_allele_id: str(sequence)})
+            write_type = 'a' if os.path.exists(new_loci) else 'w'
+            with open(new_loci, write_type) as new_loci_file:
+                new_loci_file.write(f">{new_allele_id}\n{str(sequence)}\n")
+
+            write_type = 'a' if os.path.exists(master_file_path) else 'w'
+            with open(master_file_path, write_type) as master_file:
+                master_file.write(f">{new_allele_id}\n{str(sequence)}\n")
+                
+            hashed_seq = sf.seq_to_hash(str(sequence))
+            # if CDS sequence is present in the schema count the number of
+            # genomes that it is found minus the first (subtract the first CDS genome).
+            if hashed_seq in decoded_sequences_ids:
+                #Count frequency of only presence, do not include the total cds in the genomes.
+                temp_frequency_in_genomes.setdefault(loci_id, []).append(len(set(decoded_sequences_ids[hashed_seq][1:])))
+                
+        frequency_in_genomes.setdefault(loci_id, sum(temp_frequency_in_genomes[loci_id]))
+        
+        fasta_dict = sf.fetch_fasta_dict(new_loci, False)
+
+        trans_path_file = os.path.join(possible_new_loci_translation_folder, f"{loci_id}.fasta")
+
+        trans_dict, _, _ = sf.translate_seq_deduplicate(fasta_dict,
+                                                        trans_path_file,
+                                                        None,
+                                                        constants[5],
+                                                        False,
+                                                        constants[6],
+                                                        False)
+        
+        translation_dict_possible_new_loci.update(trans_dict)
+
+    for new_loci_reps in possible_new_loci_short.values():
+        loci_id = ff.file_basename(new_loci_reps).split('_')[0]
+        fasta_dict = sf.fetch_fasta_dict(new_loci_reps, False)
+        os.remove(new_loci_reps)
+        for allele_id, sequence in fasta_dict.items():
+            new_allele_id = f"{loci_id}_{allele_id}"
+            alleles.setdefault(loci_id, {}).update({new_allele_id: sequence})
+            write_type = 'a' if os.path.exists(new_loci_reps) else 'w'
+            with open(new_loci_reps, write_type) as new_loci_reps_file:
+                new_loci_reps_file.write(f">{new_allele_id}\n{str(sequence)}\n")
+                
+    return alleles, master_file_path, possible_new_loci, translation_dict_possible_new_loci, frequency_in_genomes
+
+def write_dropped_possible_new_loci_to_file(drop_possible_loci, dropped_cds, mode, results_output):
+    """
+    Write the dropped possible new loci to a file with the reasons for dropping them.
+
+    Parameters
+    ----------
+    drop_possible_loci : set
+        A set of possible new loci IDs that should be dropped.
+    dropped_cds : dict
+        A dictionary where keys are CDS (Coding Sequences) IDs and values are the reasons for dropping them.
+    results_output : str
+        The path to the directory where the output file will be saved.
+
+    Returns
+    -------
+    None
+    """
+    drop_possible_loci_output = os.path.join(results_output, 'drop_possible_new_loci.tsv')
+    locus_drop_reason = {cds.split('_')[0]: reason 
+                         for cds, reason in dropped_cds.items() if '_' in cds} if mode == 'loci_vs_cds' else dropped_cds
+    with open(drop_possible_loci_output, 'w') as drop_possible_loci_file:
+        drop_possible_loci_file.write('Possible_new_loci_ID\tDrop_Reason\n')
+        for locus in drop_possible_loci:
+            drop_possible_loci_file.write(f"{locus}\t{locus_drop_reason[locus]}\n")
