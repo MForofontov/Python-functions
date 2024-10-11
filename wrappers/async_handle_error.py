@@ -46,9 +46,12 @@ def async_handle_error(error_message: str) -> Callable[[Callable[..., Any]], Cal
                 The result of the wrapped function, or None if an exception occurs.
             """
             try:
+                # Attempt to call the original asynchronous function
                 return await func(*args, **kwargs)
-            except Exception:
-                print(error_message)
+            except Exception as e:
+                # Print the custom error message and the exception
+                print(f"{error_message}: {e}")
+                # Return None if an exception occurs
                 return None
         return wrapper
     return decorator
