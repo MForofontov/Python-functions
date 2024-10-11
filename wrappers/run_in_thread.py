@@ -1,8 +1,61 @@
 from typing import Callable, Any
 from threading import Thread
 
-def run_in_thread(func: Callable[..., Any]) -> Callable[..., None]:
-    def wrapper(*args: Any, **kwargs: Any) -> None:
-        thread = Thread(target=func, args=args, kwargs=kwargs)
-        thread.start()
-    return wrapper
+def requires_permission(permission: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+    """
+    A decorator to enforce that a user has a specific permission before executing a function.
+
+    Parameters
+    ----------
+    permission : str
+        The required permission that the user must have.
+
+    Returns
+    -------
+    Callable[[Callable[..., Any]], Callable[..., Any]]
+        The decorator function.
+    """
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        """
+        The actual decorator function.
+
+        Parameters
+        ----------
+        func : Callable[..., Any]
+            The function to be decorated.
+
+        Returns
+        -------
+        Callable[..., Any]
+            The wrapped function.
+        """
+        def wrapper(user_permissions: list[str], *args: Any, **kwargs: Any) -> Any:
+            """
+            The wrapper function that checks for the required permission.
+
+            Parameters
+            ----------
+            user_permissions : list[str]
+                The list of permissions that the user has.
+            *args : Any
+                Positional arguments for the decorated function.
+            **kwargs : Any
+                Keyword arguments for the decorated function.
+
+            Returns
+            -------
+            Any
+                The result of the decorated function.
+
+            Raises
+            ------
+            PermissionError
+                If the user does not have the required permission.
+            """
+            # Check if the required permission is in the user's permissions
+            if permission not in user_permissions:
+                raise PermissionError("User does not have the required permission.")
+            # Call the original function with the provided arguments and keyword arguments
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator

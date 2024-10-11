@@ -31,7 +31,9 @@ def async_wrapper(func: Callable[..., Any]) -> Callable[..., Any]:
         Any
             The result of the wrapped function.
         """
+        # Get the current event loop
         loop = asyncio.get_event_loop()
+        # Run the synchronous function in an executor and return the result
         return await loop.run_in_executor(None, func, *args, **kwargs)
     
     return wrapper

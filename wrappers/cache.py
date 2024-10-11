@@ -1,7 +1,5 @@
 from typing import Callable, Any, Dict
 
-from typing import Callable, Any, Dict
-
 def cache(func: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator to cache the results of a function call.
