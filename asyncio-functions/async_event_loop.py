@@ -1,16 +1,16 @@
 import asyncio
-from typing import Callable, TypeVar
+from typing import Callable, TypeVar, Awaitable
 
 # Define a type variable T to represent the return type of the function
 T = TypeVar('T')
 
-def async_event_loop(func: Callable[[], T]) -> T:
+def async_event_loop(func: Callable[[], Awaitable[T]]) -> T:
     """
     Create and run an asynchronous event loop for testing.
 
     Parameters
     ----------
-    func : Callable[[], T]
+    func : Callable[[], Awaitable[T]]
         The asynchronous function to run in the event loop.
 
     Returns
@@ -27,5 +27,8 @@ def async_event_loop(func: Callable[[], T]) -> T:
     >>> result = async_event_loop(test_function)
     >>> print(result)  # Output: "Test completed"
     """
+    async def wrapper() -> T:
+        return await func()
+
     # Run the provided asynchronous function in an event loop and return the result
-    return asyncio.run(func())
+    return asyncio.run(wrapper())

@@ -1,11 +1,11 @@
 import asyncio
-from typing import Callable, List, TypeVar
+from typing import Callable, List, TypeVar, Awaitable
 
 # Define type variables for input and output types
 T = TypeVar('T')
 R = TypeVar('R')
 
-async def async_batch(func: Callable[[List[T]], List[R]], items: List[T], batch_size: int) -> List[R]:
+async def async_batch(func: Callable[[List[T]], Awaitable[List[R]]], items: List[T], batch_size: int) -> List[R]:
     """
     Process items in batches using an asynchronous function.
 
