@@ -26,7 +26,7 @@ class AsyncConnectionPool:
             The maximum number of connections in the pool.
         """
         self.max_connections = max_connections
-        self._pool = asyncio.Queue(max_connections)
+        self._pool: asyncio.Queue[Any] = asyncio.Queue(max_connections)
 
     async def acquire(self):
         """

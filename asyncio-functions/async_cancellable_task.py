@@ -1,10 +1,10 @@
-from typing import Callable, TypeVar
+from typing import Callable, TypeVar, Awaitable
 import asyncio
 
 # Define a type variable T to represent the return type of the task
 T = TypeVar('T')
 
-async def async_cancellable_task(task: Callable[[], T], cancel_event: asyncio.Event) -> T:
+async def async_cancellable_task(task: Callable[[], Awaitable[T]], cancel_event: asyncio.Event) -> T:
     """
     Run an asynchronous task that can be cancelled.
 
