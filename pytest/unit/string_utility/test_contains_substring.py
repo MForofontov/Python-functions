@@ -1,7 +1,13 @@
 import pytest
 from strings_utility.contains_substring import contains_substring
 
-def test_contains_substring():
+def test_contains_substring() -> None:
+    """
+    Test the contains_substring function.
+
+    This function tests the contains_substring function to ensure it correctly identifies
+    whether a substring is present within a given string.
+    """
     # Test case 1: Substring is present in the string
     assert contains_substring("hello world", "world") == True, "Failed on substring present"
 
