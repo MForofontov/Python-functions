@@ -7,10 +7,6 @@ def test_capitalize_words() -> None:
 
     This function tests the capitalize_words function to ensure it correctly capitalizes
     the first letter of each word in a string.
-
-    Examples
-    --------
-    >>> test_capitalize_words()
     """
     # Test case 1: Single word
     assert capitalize_words("hello") == "Hello", "Failed on single word"

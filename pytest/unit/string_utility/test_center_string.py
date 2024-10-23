@@ -1,7 +1,13 @@
 import pytest
 from strings_utility.center_string import center_string
 
-def test_center_string():
+def test_center_string() -> None:
+    """
+    Test the center_string function.
+
+    This function tests the center_string function to ensure it correctly centers
+    a string within a specified width using a specified fill character.
+    """
     # Test case 1: Center a string with default fill character (space)
     assert center_string("hello", 11) == '   hello   ', "Failed on default fill character"
 
