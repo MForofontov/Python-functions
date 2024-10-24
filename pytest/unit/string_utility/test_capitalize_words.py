@@ -38,5 +38,35 @@ def test_capitalize_words() -> None:
     # Test case 10: String with leading and trailing spaces
     assert capitalize_words("  hello world  ") == "  Hello World  ", "Failed on string with leading and trailing spaces"
 
+    # Test case 11: String with mixed whitespace characters
+    assert capitalize_words("hello\tworld\npython") == "Hello\tWorld\nPython", "Failed on string with mixed whitespace characters"
+
+    # Test case 12: String with special characters
+    assert capitalize_words("hello!@# world") == "Hello!@# World", "Failed on string with special characters"
+
+    # Test case 13: String with newline characters
+    assert capitalize_words("hello\nworld") == "Hello\nWorld", "Failed on string with newline characters"
+
+    # Test case 14: String with tab characters
+    assert capitalize_words("hello\tworld") == "Hello\tWorld", "Failed on string with tab characters"
+
+    # Test case 15: String with mixed case and special characters
+    assert capitalize_words("hello!@# WORLD") == "Hello!@# WORLD", "Failed on string with mixed case and special characters"
+
+    # Test case 16: String with leading and trailing special characters
+    assert capitalize_words("!@#hello world!@#") == "!@#Hello World!@#", "Failed on string with leading and trailing special characters"
+
+    # Test case 17: String with mixed case and numbers
+    assert capitalize_words("hello123 world456") == "Hello123 World456", "Failed on string with mixed case and numbers"
+
+    # Test case 18: String with leading and trailing numbers
+    assert capitalize_words("123hello world456") == "123Hello World456", "Failed on string with leading and trailing numbers"
+
+    # Test case 19: String with mixed case and punctuation
+    assert capitalize_words("hello, world!") == "Hello, World!", "Failed on string with mixed case and punctuation"
+
+    # Test case 20: String with leading and trailing punctuation
+    assert capitalize_words(",hello world!") == ",Hello World!", "Failed on string with leading and trailing punctuation"
+
 if __name__ == "__main__":
     pytest.main()
