@@ -85,7 +85,7 @@ def test_count_vowels_invalid_type() -> None:
     """
     Test the count_vowels function with an invalid type.
     """
-    # Test case: Invalid type
+    # Test case 22: Invalid type
     with pytest.raises(TypeError):
         count_vowels(12345)
 

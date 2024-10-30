@@ -74,5 +74,13 @@ def test_non_english_characters() -> None:
     # Test case 19: String with non-English characters
     assert count_consonants("héllo wörld") == 7, "Failed on string with non-English characters"
 
+def test_count_consonants_invalid_type() -> None:
+    """
+    Test the count_consonants function with an invalid type.
+    """
+    # Test case 20: Invalid type
+    with pytest.raises(TypeError):
+        count_consonants(12345)
+
 if __name__ == "__main__":
     pytest.main()

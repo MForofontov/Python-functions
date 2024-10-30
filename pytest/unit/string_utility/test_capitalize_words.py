@@ -141,5 +141,13 @@ def test_string_with_leading_and_trailing_punctuation() -> None:
     # Test case 20: String with leading and trailing punctuation
     assert capitalize_words(",hello world!") == ",Hello World!", "Failed on string with leading and trailing punctuation"
 
+def test_capitalize_words_invalid_type() -> None:
+    """
+    Test the capitalize_words function with an invalid type.
+    """
+    # Test case: Invalid type
+    with pytest.raises(TypeError):
+        capitalize_words(12345)
+
 if __name__ == "__main__":
     pytest.main()
