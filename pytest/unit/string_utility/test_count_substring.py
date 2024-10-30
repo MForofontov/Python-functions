@@ -134,5 +134,21 @@ def test_count_substring_non_english_characters() -> None:
     # Test case 19: Substring occurs with non-English characters
     assert count_substring("héllo wörld héllo", "héllo") == 2, "Failed on non-English characters"
 
+def test_count_substring_invalid_string_type() -> None:
+    """
+    Test the count_substring function with an invalid string type.
+    """
+    # Test case 20: Invalid string type
+    with pytest.raises(TypeError):
+        count_substring(12345, "hello")
+
+def test_count_substring_invalid_substring_type() -> None:
+    """
+    Test the count_substring function with an invalid substring type.
+    """
+    # Test case 21: Invalid substring type
+    with pytest.raises(TypeError):
+        count_substring("hello world", 123)
+
 if __name__ == "__main__":
     pytest.main()

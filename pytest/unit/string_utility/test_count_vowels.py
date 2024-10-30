@@ -81,5 +81,13 @@ def test_non_english_characters() -> None:
     # Test case 21: String with non-English characters
     assert count_vowels("héllo wörld") == 2, "Failed on string with non-English characters"
 
+def test_count_vowels_invalid_type() -> None:
+    """
+    Test the count_vowels function with an invalid type.
+    """
+    # Test case 22: Invalid type
+    with pytest.raises(TypeError):
+        count_vowels(12345)
+
 if __name__ == "__main__":
     pytest.main()

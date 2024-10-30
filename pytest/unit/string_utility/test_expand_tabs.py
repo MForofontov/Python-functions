@@ -127,5 +127,21 @@ def test_expand_tabs_tabs_trailing_spaces() -> None:
     # Test case 18: String with tabs and trailing spaces
     assert expand_tabs("hello\t    ") == "hello           ", "Failed on string with tabs and trailing spaces"
 
+def test_expand_tabs_invalid_string_type() -> None:
+    """
+    Test the expand_tabs function with an invalid string type.
+    """
+    # Test case 19: Invalid string type
+    with pytest.raises(TypeError):
+        expand_tabs(12345)
+
+def test_expand_tabs_invalid_tabsize_type() -> None:
+    """
+    Test the expand_tabs function with an invalid tab size type.
+    """
+    # Test case 20: Invalid tab size type
+    with pytest.raises(TypeError):
+        expand_tabs("hello\tworld", "4")
+
 if __name__ == "__main__":
     pytest.main()

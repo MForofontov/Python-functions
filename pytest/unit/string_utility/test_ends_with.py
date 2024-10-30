@@ -141,5 +141,21 @@ def test_string_ends_with_non_english_characters() -> None:
     # Test case 20: String ends with non-English characters
     assert ends_with("héllo wörld", "wörld") == True, "Failed on string ending with non-English characters"
 
+def test_ends_with_invalid_string_type() -> None:
+    """
+    Test the ends_with function with an invalid string type.
+    """
+    # Test case 21: Invalid string type
+    with pytest.raises(TypeError):
+        ends_with(12345, "world")
+
+def test_ends_with_invalid_suffix_type() -> None:
+    """
+    Test the ends_with function with an invalid suffix type.
+    """
+    # Test case 22: Invalid suffix type
+    with pytest.raises(TypeError):
+        ends_with("hello world", 123)
+
 if __name__ == "__main__":
     pytest.main()

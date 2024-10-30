@@ -99,5 +99,13 @@ def test_remove_whitespace_special_characters() -> None:
     # Test case 14: String with special characters
     assert remove_whitespace("hello!@# world") == "hello!@#world", "Failed on string with special characters"
 
+def test_remove_whitespace_invalid_type() -> None:
+    """
+    Test the remove_whitespace function with an invalid type.
+    """
+    # Test case 15: Invalid type
+    with pytest.raises(TypeError):
+        remove_whitespace(123)
+
 if __name__ == "__main__":
     pytest.main()
