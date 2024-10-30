@@ -134,5 +134,13 @@ def test_palindrome_mixed_whitespace() -> None:
     # Test case 19: Palindrome with mixed whitespace characters
     assert is_palindrome("race \t\ncar") == False, "Failed on palindrome with mixed whitespace characters"
 
+def test_is_palindrome_invalid_type() -> None:
+    """
+    Test the is_palindrome function with an invalid type.
+    """
+    # Test case: Invalid type
+    with pytest.raises(TypeError):
+        is_palindrome(12345)
+
 if __name__ == "__main__":
     pytest.main()

@@ -120,5 +120,21 @@ def test_join_strings_multiple_delimiters() -> None:
     # Test case 17: Join a list of strings with multiple delimiters
     assert join_strings(["hello", "world"], delimiter="---") == "hello---world", "Failed on multiple delimiters"
 
+def test_join_strings_invalid_strings_type() -> None:
+    """
+    Test the join_strings function with an invalid strings type.
+    """
+    # Test case 18: Invalid strings type
+    with pytest.raises(TypeError):
+        join_strings("hello world", delimiter=" ")
+
+def test_join_strings_invalid_delimiter_type() -> None:
+    """
+    Test the join_strings function with an invalid delimiter type.
+    """
+    # Test case 19: Invalid delimiter type
+    with pytest.raises(TypeError):
+        join_strings(["hello", "world"], delimiter=123)
+
 if __name__ == "__main__":
     pytest.main()

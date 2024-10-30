@@ -134,5 +134,37 @@ def test_ljust_string_non_english_characters() -> None:
     # Test case 19: Left-justify a string with non-English characters
     assert ljust_string("héllo wörld", 15) == 'héllo wörld    ', "Failed on non-English characters"
 
+def test_ljust_string_invalid_string_type() -> None:
+    """
+    Test the ljust_string function with an invalid string type.
+    """
+    # Test case 20: Invalid string type
+    with pytest.raises(TypeError):
+        ljust_string(12345, 10)
+
+def test_ljust_string_invalid_width_type() -> None:
+    """
+    Test the ljust_string function with an invalid width type.
+    """
+    # Test case 21: Invalid width type
+    with pytest.raises(TypeError):
+        ljust_string("hello", "10")
+
+def test_ljust_string_invalid_fillchar_type() -> None:
+    """
+    Test the ljust_string function with an invalid fill character type.
+    """
+    # Test case 22: Invalid fill character type
+    with pytest.raises(TypeError):
+        ljust_string("hello", 10, 5)
+
+def test_ljust_string_invalid_fillchar_length() -> None:
+    """
+    Test the ljust_string function with an invalid fill character length.
+    """
+    # Test case 23: Invalid fill character length
+    with pytest.raises(TypeError):
+        ljust_string("hello", 10, "ab")
+
 if __name__ == "__main__":
     pytest.main()
