@@ -92,5 +92,21 @@ def test_repeat_string_non_english_characters() -> None:
     # Test case 13: Repeat a string with non-English characters
     assert repeat_string("héllo", 2) == "héllohéllo", "Failed on repeating string with non-English characters"
 
+def test_repeat_string_invalid_string_type() -> None:
+    """
+    Test the repeat_string function with an invalid string type.
+    """
+    # Test case 14: Invalid string type
+    with pytest.raises(TypeError):
+        repeat_string(123, 2)
+
+def test_repeat_string_invalid_repeat_count_type() -> None:
+    """
+    Test the repeat_string function with an invalid repeat count type.
+    """
+    # Test case 15: Invalid repeat count type
+    with pytest.raises(TypeError):
+        repeat_string("hello", "2")
+
 if __name__ == "__main__":
     pytest.main()

@@ -92,5 +92,13 @@ def test_remove_non_alphanumeric_numbers_at_start_and_end() -> None:
     # Test case 13: String with numbers at the start and end
     assert remove_non_alphanumeric("123abc456") == "123abc456", "Failed on string with numbers at the start and end"
 
+def test_remove_non_alphanumeric_invalid_type() -> None:
+    """
+    Test the remove_non_alphanumeric function with an invalid type.
+    """
+    # Test case 14: Invalid type
+    with pytest.raises(TypeError):
+        remove_non_alphanumeric(123)
+
 if __name__ == "__main__":
     pytest.main()
