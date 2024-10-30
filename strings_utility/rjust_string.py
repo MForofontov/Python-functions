@@ -23,4 +23,10 @@ def rjust_string(s: str, width: int, fillchar: str = ' ') -> str:
     >>> rjust_string("hello", 10, '-')
     '-----hello'
     """
+    if not isinstance(s, str):
+        raise TypeError("The first argument must be a string.")
+    if not isinstance(width, int):
+        raise TypeError("The second argument must be an integer.")
+    if not isinstance(fillchar, str) or len(fillchar) != 1:
+        raise TypeError("The third argument must be a single character string.")
     return s.rjust(width, fillchar)
