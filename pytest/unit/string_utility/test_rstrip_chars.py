@@ -1,5 +1,5 @@
 import pytest
-from rstrip_chars import rstrip_chars
+from strings_utility.rstrip_chars import rstrip_chars
 
 def test_rstrip_chars_single_character() -> None:
     """
