@@ -138,7 +138,7 @@ def test_is_palindrome_invalid_type() -> None:
     """
     Test the is_palindrome function with an invalid type.
     """
-    # Test case: Invalid type
+    # Test case 20: Invalid type
     with pytest.raises(TypeError):
         is_palindrome(12345)
 

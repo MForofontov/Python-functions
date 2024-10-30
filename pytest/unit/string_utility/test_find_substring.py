@@ -148,5 +148,21 @@ def test_non_english_characters() -> None:
     # Test case 21: Substring with non-English characters
     assert find_substring("héllo wörld", "wörld") == 6, "Failed on substring with non-English characters"
 
+def test_find_substring_invalid_string_type() -> None:
+    """
+    Test the find_substring function with an invalid string type.
+    """
+    # Test case 22: Invalid string type
+    with pytest.raises(TypeError):
+        find_substring(12345, "hello")
+
+def test_find_substring_invalid_substring_type() -> None:
+    """
+    Test the find_substring function with an invalid substring type.
+    """
+    # Test case 23: Invalid substring type
+    with pytest.raises(TypeError):
+        find_substring("hello world", 123)
+
 if __name__ == "__main__":
     pytest.main()
