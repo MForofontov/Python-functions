@@ -48,7 +48,7 @@ def test_numbers_and_special_characters() -> None:
     # Test case 11: String with numbers and special characters
     assert count_vowels("12345!@#$%") == 0, "Failed on string with numbers and special characters"
     # Test case 12: String with mixed vowels, consonants, numbers, and special characters
-    assert count_vowels("h3ll0 w0rld!") == 1, "Failed on mixed vowels, consonants, numbers, and special characters"
+    assert count_vowels("h3llo w0rld!") == 1, "Failed on mixed vowels, consonants, numbers, and special characters"
     # Test case 13: String with punctuation
     assert count_vowels("hello, world!") == 3, "Failed on string with punctuation"
     # Test case 14: String with special characters
@@ -76,7 +76,7 @@ def test_non_english_characters() -> None:
     Test the count_vowels function with non-English characters.
     """
     # Test case 21: String with non-English characters
-    assert count_vowels("héllo wörld") == 2, "Failed on string with non-English characters"
+    assert count_vowels("héllo wörld") == 1, "Failed on string with non-English characters"
 
 def test_count_vowels_invalid_type() -> None:
     """

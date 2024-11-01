@@ -1,6 +1,6 @@
 def count_consonants(s: str) -> int:
     """
-    Count the number of consonants in a string.
+    Count the number of consonants in a string (English).
 
     Parameters
     ----------
@@ -22,4 +22,4 @@ def count_consonants(s: str) -> int:
     if not isinstance(s, str):
         raise TypeError("The input must be a string.")
     consonants = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ"
-    return sum(1 for char in s if char.isalpha() and char not in consonants)
+    return sum(1 for char in s if char in consonants)

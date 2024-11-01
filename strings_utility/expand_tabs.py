@@ -21,4 +21,6 @@ def expand_tabs(s: str, tabsize: int = 8) -> str:
     >>> expand_tabs("hello\tworld", tabsize=4)
     'hello   world'
     """
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
     return s.expandtabs(tabsize)

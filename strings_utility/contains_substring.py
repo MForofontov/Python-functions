@@ -21,6 +21,6 @@ def contains_substring(s: str, substring: str) -> bool:
     >>> contains_substring("hello world", "there")
     False
     """
-    if not isinstance(s, str):
+    if not isinstance(s, str) or not isinstance(substring, str):
         raise TypeError("The input must be a string.")
     return substring in s
