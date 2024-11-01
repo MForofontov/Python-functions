@@ -21,4 +21,6 @@ def ends_with(s: str, suffix: str) -> bool:
     >>> ends_with("hello world", "hello")
     False
     """
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
     return s.endswith(suffix)

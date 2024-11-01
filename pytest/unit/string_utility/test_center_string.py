@@ -104,7 +104,7 @@ def test_center_string_leading_trailing_spaces() -> None:
     Test the center_string function with leading and trailing spaces.
     """
     # Test case 15: Center a string with leading and trailing spaces
-    assert center_string("  hello  ", 15) == '    hello     ', "Failed on leading and trailing spaces"
+    assert center_string("  hello  ", 15) == '     hello     ', "Failed on leading and trailing spaces"
 
 def test_center_string_newline_characters() -> None:
     """

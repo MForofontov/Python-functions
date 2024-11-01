@@ -1,5 +1,5 @@
 import pytest
-from reverse_string import reverse_string
+from strings_utility.reverse_string import reverse_string
 
 def test_reverse_string_basic() -> None:
     """

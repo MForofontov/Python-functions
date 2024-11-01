@@ -19,5 +19,7 @@ def count_consonants(s: str) -> int:
     >>> count_consonants("world")
     4
     """
-    vowels = 'aeiouAEIOU'
-    return sum(1 for char in s if char.isalpha() and char not in vowels)
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
+    consonants = "bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ"
+    return sum(1 for char in s if char.isalpha() and char not in consonants)
