@@ -21,4 +21,6 @@ def find_substring(s: str, substring: str) -> int:
     >>> find_substring("hello world", "there")
     -1
     """
+    if not isinstance(s, str) or not isinstance(substring, str):
+        raise TypeError("The input must be a string.")
     return s.find(substring)
