@@ -17,4 +17,6 @@ def capitalize_words(s: str) -> str:
     >>> capitalize_words("hello world")
     'Hello World'
     """
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
     return s.title()

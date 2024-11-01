@@ -1,5 +1,5 @@
 import pytest
-from rjust_string import rjust_string
+from strings_utility.rjust_string import rjust_string
 
 def test_rjust_string_default_fill() -> None:
     """

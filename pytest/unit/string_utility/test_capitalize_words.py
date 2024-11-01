@@ -104,7 +104,7 @@ def test_string_with_mixed_case_and_special_characters() -> None:
     Test the capitalize_words function with a string that has mixed case and special characters.
     """
     # Test case 15: String with mixed case and special characters
-    assert capitalize_words("hello!@# WORLD") == "Hello!@# WORLD", "Failed on string with mixed case and special characters"
+    assert capitalize_words("hello!@# WORLD") == "Hello!@# World", "Failed on string with mixed case and special characters"
 
 def test_string_with_leading_and_trailing_special_characters() -> None:
     """
@@ -145,7 +145,7 @@ def test_capitalize_words_invalid_type() -> None:
     """
     Test the capitalize_words function with an invalid type.
     """
-    # Test case: Invalid type
+    # Test case 21: Invalid type
     with pytest.raises(TypeError):
         capitalize_words(12345)
 
