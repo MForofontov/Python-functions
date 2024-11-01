@@ -1,9 +1,6 @@
 import pytest
 from strings_utility.count_vowels import count_vowels
 
-import pytest
-from strings_utility import count_vowels
-
 def test_mixed_case_vowels_and_consonants() -> None:
     """
     Test the count_vowels function with mixed case vowels and consonants.

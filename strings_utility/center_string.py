@@ -23,4 +23,6 @@ def center_string(s: str, width: int, fillchar: str = ' ') -> str:
     >>> center_string("hello", 11, '-')
     '---hello---'
     """
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
     return s.center(width, fillchar)
