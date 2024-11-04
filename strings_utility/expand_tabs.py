@@ -1,4 +1,4 @@
-def expand_tabs(s: str, tabsize: int = 8) -> str:
+def expand_tabs(s: str, tabsize: int = 4) -> str:
     """
     Expand tabs in a string to multiple spaces.
 
@@ -23,4 +23,6 @@ def expand_tabs(s: str, tabsize: int = 8) -> str:
     """
     if not isinstance(s, str):
         raise TypeError("The input must be a string.")
-    return s.expandtabs(tabsize)
+    if tabsize < 0:
+        raise ValueError("Tab size must be non-negative.")
+    return s.replace("\t", " " * tabsize)
