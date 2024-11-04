@@ -21,4 +21,6 @@ def count_substring(s: str, substring: str) -> int:
     >>> count_substring("ababab", "ab")
     3
     """
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
     return s.count(substring)
