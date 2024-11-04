@@ -1,6 +1,6 @@
-def expand_tabs(s: str, tabsize: int = 4) -> str:
+def replace_tabs(s: str, tabsize: int = 4) -> str:
     """
-    Expand tabs in a string to multiple spaces.
+    Replaces tabs in a string to multiple spaces.
 
     Parameters
     ----------
@@ -12,7 +12,7 @@ def expand_tabs(s: str, tabsize: int = 4) -> str:
     Returns
     -------
     str
-        The string with tabs expanded to spaces.
+        The string with tabs replaced to spaces.
 
     Examples
     --------
