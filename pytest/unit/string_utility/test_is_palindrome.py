@@ -111,7 +111,7 @@ def test_palindrome_leading_trailing_spaces() -> None:
     Test the is_palindrome function with a palindrome that includes leading and trailing spaces.
     """
     # Test case 16: Palindrome with leading and trailing spaces
-    assert is_palindrome(" racecar ") == False, "Failed on palindrome with leading and trailing spaces"
+    assert is_palindrome(" racecar ") == True, "Failed on palindrome with leading and trailing spaces"
 
 def test_palindrome_with_newline_characters() -> None:
     """
