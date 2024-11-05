@@ -23,4 +23,10 @@ def ljust_string(s: str, width: int, fillchar: str = ' ') -> str:
     >>> ljust_string("hello", 10, '-')
     'hello-----'
     """
+    if not isinstance(s, str):
+        raise TypeError("The input string must be a string.")
+    if not isinstance(width, int):
+        raise TypeError("The width must be an integer.")
+    if not isinstance(fillchar, str) or len(fillchar) != 1:
+        raise TypeError("The fill character must be a single character string.")
     return s.ljust(width, fillchar)

@@ -1,3 +1,5 @@
+import string
+
 def remove_punctuation(s: str) -> str:
     """
     Remove all punctuation characters from a string.
@@ -19,5 +21,6 @@ def remove_punctuation(s: str) -> str:
     >>> remove_punctuation("a.b,c!")
     'abc'
     """
-    import string
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
     return s.translate(str.maketrans('', '', string.punctuation))

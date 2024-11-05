@@ -19,4 +19,6 @@ def remove_digits(s: str) -> str:
     >>> remove_digits("12345")
     ''
     """
+    if not isinstance(s, str):
+        raise TypeError("Input must be a string.")
     return ''.join(char for char in s if not char.isdigit())
