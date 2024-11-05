@@ -19,4 +19,6 @@ def remove_whitespace(s: str) -> str:
     >>> remove_whitespace(" a b c ")
     'abc'
     """
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
     return ''.join(s.split())
