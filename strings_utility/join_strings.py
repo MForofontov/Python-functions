@@ -23,6 +23,8 @@ def join_strings(strings: List[str], delimiter: str = ' ') -> str:
     >>> join_strings(['a', 'b', 'c'], delimiter=",")
     'a,b,c'
     """
-    if not isinstance(strings, str):
-        raise TypeError("The input must be a string.")
+    if not all(isinstance(item, str) for item in strings):
+        raise TypeError("All elements in the list must be strings.")
+    if not isinstance(delimiter, str):
+        raise TypeError("The delimiter must be a string.")
     return delimiter.join(strings)
