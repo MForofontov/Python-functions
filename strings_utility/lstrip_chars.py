@@ -21,4 +21,8 @@ def lstrip_chars(s: str, chars: str) -> str:
     >>> lstrip_chars("xyzhellozyx", "xyz")
     'hellozyx'
     """
+    if not isinstance(s, str):
+        raise TypeError("The input string must be a string.")
+    if not isinstance(chars, str):
+        raise TypeError("The characters to strip must be a string.")
     return s.lstrip(chars)
