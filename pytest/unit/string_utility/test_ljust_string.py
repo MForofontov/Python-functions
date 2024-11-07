@@ -76,7 +76,7 @@ def test_ljust_string_mixed_whitespace() -> None:
     Test the ljust_string function with a string that contains mixed whitespace characters.
     """
     # Test case 11: Left-justify a string with mixed whitespace characters
-    assert ljust_string("hello \t\n", 10, '_') == 'hello \t\n_', "Failed on string with mixed whitespace characters"
+    assert ljust_string("hello \t\n", 10, '_') == 'hello \t\n__', "Failed on string with mixed whitespace characters"
 
 def test_ljust_string_invalid_string_type() -> None:
     """
