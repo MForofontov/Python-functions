@@ -12,12 +12,21 @@ def remove_digits(s: str) -> str:
     str
         The string with all numerical digits removed.
 
+    Raises
+    ------
+    TypeError
+        If the input is not a string.
+
     Examples
     --------
     >>> remove_digits("abc123")
     'abc'
     >>> remove_digits("12345")
     ''
+    >>> remove_digits("hello123world")
+    'helloworld'
+    >>> remove_digits("no digits here")
+    'no digits here'
     """
     if not isinstance(s, str):
         raise TypeError("Input must be a string.")

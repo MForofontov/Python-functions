@@ -14,13 +14,24 @@ def contains_substring(s: str, substring: str) -> bool:
     bool
         True if the string contains the substring, False otherwise.
 
+    Raises
+    ------
+    TypeError
+        If the input string or the substring is not a string.
+
     Examples
     --------
     >>> contains_substring("hello world", "world")
     True
     >>> contains_substring("hello world", "there")
     False
+    >>> contains_substring("abc123", "123")
+    True
+    >>> contains_substring("abc123", "456")
+    False
     """
-    if not isinstance(s, str) or not isinstance(substring, str):
+    if not isinstance(s, str):
         raise TypeError("The input must be a string.")
+    if not isinstance(substring, str):
+        raise TypeError("The substring must be a string.")
     return substring in s

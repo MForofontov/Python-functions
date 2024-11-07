@@ -12,10 +12,19 @@ def capitalize_words(s: str) -> str:
     str
         The string with the first letter of each word capitalized.
 
+    Raises
+    ------
+    TypeError
+        If the input is not a string.
+
     Examples
     --------
     >>> capitalize_words("hello world")
     'Hello World'
+    >>> capitalize_words("python programming")
+    'Python Programming'
+    >>> capitalize_words("123 hello")
+    '123 Hello'
     """
     if not isinstance(s, str):
         raise TypeError("The input must be a string.")

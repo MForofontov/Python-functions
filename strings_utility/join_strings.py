@@ -16,14 +16,23 @@ def join_strings(strings: List[str], delimiter: str = ' ') -> str:
     str
         The joined string.
 
+    Raises
+    ------
+    TypeError
+        If the input is not a list of strings or the delimiter is not a string.
+
     Examples
     --------
     >>> join_strings(['hello', 'world'])
     'hello world'
     >>> join_strings(['a', 'b', 'c'], delimiter=",")
     'a,b,c'
+    >>> join_strings(['one', 'two', 'three'], delimiter=" - ")
+    'one - two - three'
+    >>> join_strings(['apple', 'banana', 'cherry'])
+    'apple banana cherry'
     """
-    if not all(isinstance(item, str) for item in strings):
+    if not isinstance(strings, list) or not all(isinstance(item, str) for item in strings):
         raise TypeError("All elements in the list must be strings.")
     if not isinstance(delimiter, str):
         raise TypeError("The delimiter must be a string.")
