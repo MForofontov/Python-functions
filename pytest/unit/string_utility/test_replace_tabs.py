@@ -69,7 +69,7 @@ def test_replace_tabs_mixed_whitespace() -> None:
     Test the replace_tabs function with a string that contains mixed whitespace characters.
     """
     # Test case 10: String with mixed whitespace characters
-    assert replace_tabs(" \t\nhello\tworld\t\n ") == "    \nhello    world    \n ", "Failed on string with mixed whitespace characters"
+    assert replace_tabs(" \t\nhello\tworld\t\n ") == "     \nhello    world    \n ", "Failed on string with mixed whitespace characters"
 
 def test_replace_tabs_tabs_non_english_characters() -> None:
     """
