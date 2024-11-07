@@ -21,4 +21,8 @@ def repeat_string(s: str, n: int) -> str:
     >>> repeat_string("abc", 2)
     'abcabc'
     """
+    if not isinstance(s, str):
+        raise TypeError("The input string must be a string.")
+    if not isinstance(n, int):
+        raise TypeError("The number of times must be an integer.")
     return s * n
