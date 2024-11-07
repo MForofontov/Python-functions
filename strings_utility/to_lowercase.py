@@ -1,6 +1,6 @@
 def to_lowercase(s: str) -> str:
     """
-    Convert a string to lowercase.
+    Convert all characters in a string to lowercase.
 
     Parameters
     ----------
@@ -10,11 +10,24 @@ def to_lowercase(s: str) -> str:
     Returns
     -------
     str
-        The lowercase version of the input string.
+        The string with all characters converted to lowercase.
+
+    Raises
+    ------
+    TypeError
+        If the input is not a string.
 
     Examples
     --------
-    >>> to_lowercase("HELLO")
-    'hello'
+    >>> to_lowercase("Hello World")
+    'hello world'
+    >>> to_lowercase("PYTHON")
+    'python'
+    >>> to_lowercase("12345")
+    '12345'
+    >>> to_lowercase("!@#")
+    '!@#'
     """
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
     return s.lower()

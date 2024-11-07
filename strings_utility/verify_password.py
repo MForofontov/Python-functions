@@ -22,6 +22,11 @@ def verify_password(password: str, custom_checks: List[Callable[[str], bool]] = 
     bool
         True if the password meets all criteria, False otherwise.
 
+    Raises
+    ------
+    TypeError
+        If the password is not a string or if custom_checks is not a list of callables.
+
     Examples
     --------
     >>> verify_password("Password123!")
@@ -38,6 +43,11 @@ def verify_password(password: str, custom_checks: List[Callable[[str], bool]] = 
     >>> verify_password("Password123!", custom_checks=[custom_check])
     False
     """
+    if not isinstance(password, str):
+        raise TypeError("The password must be a string.")
+    if not isinstance(custom_checks, list) or not all(callable(check) for check in custom_checks):
+        raise TypeError("custom_checks must be a list of callables.")
+    
     # Check if the password is at least 8 characters long
     if len(password) < 8:
         return False
@@ -60,4 +70,3 @@ def verify_password(password: str, custom_checks: List[Callable[[str], bool]] = 
             return False
 
     return True
-

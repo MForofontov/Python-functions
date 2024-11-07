@@ -27,6 +27,10 @@ def replace_multiple_substrings(s: str, replacements: Dict[str, str]) -> str:
     'hi earth'
     >>> replace_multiple_substrings("abc def ghi", {"abc": "123", "def": "456"})
     '123 456 ghi'
+    >>> replace_multiple_substrings("foo bar baz", {"foo": "FOO", "bar": "BAR"})
+    'FOO BAR baz'
+    >>> replace_multiple_substrings("123 456 789", {"123": "one", "456": "two"})
+    'one two 789'
     """
     if not isinstance(s, str):
         raise TypeError("The input string must be a string.")

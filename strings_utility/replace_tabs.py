@@ -1,28 +1,40 @@
 def replace_tabs(s: str, tabsize: int = 4) -> str:
     """
-    Replaces tabs in a string to multiple spaces.
+    Replace all tab characters in a string with a specified number of spaces.
 
     Parameters
     ----------
     s : str
         The input string.
     tabsize : int, optional
-        The number of spaces to replace each tab with (default is 8).
+        The number of spaces to replace each tab character with (default is 4).
 
     Returns
     -------
     str
-        The string with tabs replaced to spaces.
+        The string with all tab characters replaced by the specified number of spaces.
+
+    Raises
+    ------
+    TypeError
+        If the input string is not a string or the tab size is not an integer.
+    ValueError
+        If the tab size is negative.
 
     Examples
     --------
-    >>> expand_tabs("hello\tworld")
-    'hello   world'
-    >>> expand_tabs("hello\tworld", tabsize=4)
-    'hello   world'
+    >>> replace_tabs("hello\tworld")
+    'hello    world'
+    >>> replace_tabs("hello\tworld", 2)
+    'hello  world'
+    >>> replace_tabs("hello\tworld", 8)
+    'hello        world'
     """
     if not isinstance(s, str):
-        raise TypeError("The input must be a string.")
+        raise TypeError("The input string must be a string.")
+    if not isinstance(tabsize, int):
+        raise TypeError("The tab size must be an integer.")
     if tabsize < 0:
-        raise ValueError("Tab size must be non-negative.")
-    return s.replace("\t", " " * tabsize)
+        raise ValueError("The tab size must be non-negative.")
+    
+    return s.expandtabs(tabsize)

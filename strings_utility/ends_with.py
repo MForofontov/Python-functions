@@ -14,13 +14,24 @@ def ends_with(s: str, suffix: str) -> bool:
     bool
         True if the string ends with the suffix, False otherwise.
 
+    Raises
+    ------
+    TypeError
+        If the input string or the suffix is not a string.
+
     Examples
     --------
     >>> ends_with("hello world", "world")
     True
     >>> ends_with("hello world", "hello")
     False
+    >>> ends_with("abc123", "123")
+    True
+    >>> ends_with("abc123", "456")
+    False
     """
     if not isinstance(s, str):
         raise TypeError("The input must be a string.")
+    if not isinstance(suffix, str):
+        raise TypeError("The suffix must be a string.")
     return s.endswith(suffix)

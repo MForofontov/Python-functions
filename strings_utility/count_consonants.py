@@ -12,12 +12,21 @@ def count_consonants(s: str) -> int:
     int
         The number of consonants in the input string.
 
+    Raises
+    ------
+    TypeError
+        If the input is not a string.
+
     Examples
     --------
     >>> count_consonants("hello")
     3
     >>> count_consonants("world")
     4
+    >>> count_consonants("aeiou")
+    0
+    >>> count_consonants("bcdfghjklmnpqrstvwxyz")
+    21
     """
     if not isinstance(s, str):
         raise TypeError("The input must be a string.")

@@ -10,13 +10,24 @@ def swapcase_string(s: str) -> str:
     Returns
     -------
     str
-        The string with each character's case swapped.
+        The string with the case of each character swapped.
+
+    Raises
+    ------
+    TypeError
+        If the input is not a string.
 
     Examples
     --------
     >>> swapcase_string("Hello World")
     'hELLO wORLD'
-    >>> swapcase_string("Python")
-    'pYTHON'
+    >>> swapcase_string("Python3.8")
+    'pYTHON3.8'
+    >>> swapcase_string("12345")
+    '12345'
+    >>> swapcase_string("!@#")
+    '!@#'
     """
+    if not isinstance(s, str):
+        raise TypeError("The input must be a string.")
     return s.swapcase()

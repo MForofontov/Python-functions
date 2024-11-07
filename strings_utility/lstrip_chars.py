@@ -14,12 +14,21 @@ def lstrip_chars(s: str, chars: str) -> str:
     str
         The string with specified characters stripped from the left end.
 
+    Raises
+    ------
+    TypeError
+        If the input string or the characters to strip are not strings.
+
     Examples
     --------
     >>> lstrip_chars("...hello...", ".")
     'hello...'
     >>> lstrip_chars("xyzhellozyx", "xyz")
     'hellozyx'
+    >>> lstrip_chars("123abc123", "123")
+    'abc123'
+    >>> lstrip_chars("!!!hello!!!", "!")
+    'hello!!!'
     """
     if not isinstance(s, str):
         raise TypeError("The input string must be a string.")

@@ -16,12 +16,21 @@ def ljust_string(s: str, width: int, fillchar: str = ' ') -> str:
     str
         The left-justified string.
 
+    Raises
+    ------
+    TypeError
+        If the input string is not a string, the width is not an integer, or the fill character is not a single character string.
+
     Examples
     --------
     >>> ljust_string("hello", 10)
     'hello     '
     >>> ljust_string("hello", 10, '-')
     'hello-----'
+    >>> ljust_string("test", 8, '*')
+    'test****'
+    >>> ljust_string("example", 7)
+    'example'
     """
     if not isinstance(s, str):
         raise TypeError("The input string must be a string.")

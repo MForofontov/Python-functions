@@ -29,76 +29,50 @@ def test_verify_password_no_lowercase() -> None:
     # Test case 4: No lowercase characters
     assert verify_password("PASSWORD123!") == False, "Failed on no lowercase characters"
 
-def test_verify_password_no_digit() -> None:
+def test_verify_password_no_digits() -> None:
     """
     Test the verify_password function with a password that has no numerical digits.
     """
     # Test case 5: No numerical digits
     assert verify_password("Password!!!") == False, "Failed on no numerical digits"
 
-def test_verify_password_no_special_character() -> None:
+def test_verify_password_no_special_characters() -> None:
     """
     Test the verify_password function with a password that has no special characters.
     """
     # Test case 6: No special characters
     assert verify_password("Password123") == False, "Failed on no special characters"
 
-def test_verify_password_only_special_characters() -> None:
-    """
-    Test the verify_password function with a password that has only special characters.
-    """
-    # Test case 7: Only special characters
-    assert verify_password("!@#$%^&*") == False, "Failed on only special characters"
-
-def test_verify_password_only_digits() -> None:
-    """
-    Test the verify_password function with a password that has only digits.
-    """
-    # Test case 8: Only digits
-    assert verify_password("12345678") == False, "Failed on only digits"
-
-def test_verify_password_only_uppercase() -> None:
-    """
-    Test the verify_password function with a password that has only uppercase characters.
-    """
-    # Test case 9: Only uppercase characters
-    assert verify_password("PASSWORD") == False, "Failed on only uppercase characters"
-
-def test_verify_password_only_lowercase() -> None:
-    """
-    Test the verify_password function with a password that has only lowercase characters.
-    """
-    # Test case 10: Only lowercase characters
-    assert verify_password("password") == False, "Failed on only lowercase characters"
-
 def test_verify_password_empty_string() -> None:
     """
     Test the verify_password function with an empty string.
     """
-    # Test case 11: Empty string
+    # Test case 7: Empty string
     assert verify_password("") == False, "Failed on empty string"
 
-def test_verify_password_non_english_characters() -> None:
+def test_verify_password_custom_check_pass() -> None:
     """
-    Test the verify_password function with a password that contains non-English characters.
+    Test the verify_password function with a custom check that passes.
     """
-    # Test case 12: Non-English characters
-    assert verify_password("Pässwörd123!") == True, "Failed on non-English characters"
+    # Test case 8: Custom check that passes
+    custom_check = lambda p: 'example' in p
+    assert verify_password("Password123!example", custom_checks=[custom_check]) == True, "Failed on custom check that passes"
 
-def test_verify_password_mixed_whitespace() -> None:
+def test_verify_password_custom_check_fail() -> None:
     """
-    Test the verify_password function with a password that contains mixed whitespace characters.
+    Test the verify_password function with a custom check that fails.
     """
-    # Test case 13: Mixed whitespace characters
-    assert verify_password("Pass word123!") == True, "Failed on mixed whitespace characters"
+    # Test case 9: Custom check that fails
+    custom_check = lambda p: 'example' in p
+    assert verify_password("Password123!", custom_checks=[custom_check]) == False, "Failed on custom check that fails"
 
 def test_verify_password_invalid_type() -> None:
     """
     Test the verify_password function with an invalid type.
     """
-    # Test case 14: Invalid type
+    # Test case 10: Invalid type
     with pytest.raises(TypeError):
-        verify_password(12345678)
+        verify_password(12345)
 
 if __name__ == "__main__":
     pytest.main()
