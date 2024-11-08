@@ -36,7 +36,5 @@ def truncate_string(s: str, length: int) -> str:
         raise TypeError("The input string must be a string.")
     if not isinstance(length, int):
         raise TypeError("The length must be an integer.")
-    if length < 0:
-        raise ValueError("The length must be non-negative.")
     
     return s[:length]

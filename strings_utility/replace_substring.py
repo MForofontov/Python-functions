@@ -38,5 +38,10 @@ def replace_substring(s: str, old: str, new: str) -> str:
         raise TypeError("The old substring must be a string.")
     if not isinstance(new, str):
         raise TypeError("The new substring must be a string.")
+    # If old is an empty string, return the original because there is '' between each character
+    if old == "":
+        return s
     
     return s.replace(old, new)
+
+print(replace_substring("hello", "", "hi"))

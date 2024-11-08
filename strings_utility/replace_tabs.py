@@ -37,4 +37,4 @@ def replace_tabs(s: str, tabsize: int = 4) -> str:
     if tabsize < 0:
         raise ValueError("The tab size must be non-negative.")
     
-    return s.expandtabs(tabsize)
+    return s.replace('\t', '' * tabsize)

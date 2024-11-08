@@ -71,11 +71,18 @@ def test_truncate_string_mixed_whitespace() -> None:
     # Test case 10: String with mixed whitespace characters
     assert truncate_string(" \t\nhello world\t\n ", 8) == " \t\nhello", "Failed on string with mixed whitespace characters"
 
+def test_truncate_string_negative_length() -> None:
+    """
+    Test the truncate_string function with a negative length.
+    """
+    # Test case 11: Negative length
+    assert truncate_string("hello", -3) == "he", "Failed on negative length"
+
 def test_truncate_string_invalid_string_type() -> None:
     """
     Test the truncate_string function with an invalid string type.
     """
-    # Test case 11: Invalid string type
+    # Test case 12: Invalid string type
     with pytest.raises(TypeError):
         truncate_string(12345, 3)
 
@@ -83,16 +90,9 @@ def test_truncate_string_invalid_length_type() -> None:
     """
     Test the truncate_string function with an invalid length type.
     """
-    # Test case 12: Invalid length type
+    # Test case 13: Invalid length type
     with pytest.raises(TypeError):
         truncate_string("hello", "3")
-
-def test_truncate_string_negative_length() -> None:
-    """
-    Test the truncate_string function with a negative length.
-    """
-    # Test case 13: Negative length
-    assert truncate_string("hello", -3) == "he", "Failed on negative length"
 
 if __name__ == "__main__":
     pytest.main()
