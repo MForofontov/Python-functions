@@ -1,4 +1,4 @@
-# Python Functions
+ # Python Functions
 
 This repository, **MForofontov/Python-functions**, contains a comprehensive set of Python functions organized by type. The goal is to provide a collection of reusable code snippets for various programming tasks. Below is an overview of the repository:
 
@@ -14,6 +14,14 @@ This repository, **MForofontov/Python-functions**, contains a comprehensive set 
 ## Usage
 
 Each function is documented with its purpose, input parameters, and output. Examples are provided to demonstrate how to use the functions effectively.
+
+## Unit Tests
+
+This repository uses `pytest` for unit testing to ensure the reliability and correctness of the functions. The tests are organized by the type of function they cover. To run the tests, use the following command:
+
+```sh
+pytest
+```
 
 ## Contribution
 
