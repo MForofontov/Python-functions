@@ -61,7 +61,7 @@ def verify_password(password: str, custom_checks: List[Callable[[str], bool]] = 
         return False
 
     # Check if the password contains at least one special character
-    if not re.search(r'[@#$%^&+=]', password):
+    if not re.search(r'[!@#$%^&+=]', password):
         return False
 
     # Check custom rules
