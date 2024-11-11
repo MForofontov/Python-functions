@@ -88,5 +88,3 @@ def test_replace_substring_invalid_new_type() -> None:
     with pytest.raises(TypeError):
         replace_substring("hello world", "world", 123)
 
-if __name__ == "__main__":
-    pytest.main()

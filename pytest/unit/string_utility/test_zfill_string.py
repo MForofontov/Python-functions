@@ -79,6 +79,3 @@ def test_zfill_string_invalid_width_type() -> None:
     # Test case 11: Invalid width type
     with pytest.raises(TypeError):
         zfill_string("42", "5")
-
-if __name__ == "__main__":
-    pytest.main()

@@ -79,5 +79,3 @@ def test_swapcase_string_invalid_type() -> None:
     with pytest.raises(TypeError):
         swapcase_string(12345)
 
-if __name__ == "__main__":
-    pytest.main()

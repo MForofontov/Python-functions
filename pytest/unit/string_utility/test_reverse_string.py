@@ -79,5 +79,3 @@ def test_reverse_string_invalid_type() -> None:
     with pytest.raises(TypeError):
         reverse_string(12345)
 
-if __name__ == "__main__":
-    pytest.main()

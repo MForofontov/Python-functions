@@ -157,5 +157,3 @@ def test_strip_chars_invalid_chars_type() -> None:
     with pytest.raises(TypeError):
         strip_chars("hello", 123)
 
-if __name__ == "__main__":
-    pytest.main()

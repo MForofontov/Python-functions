@@ -114,5 +114,3 @@ def test_remove_punctuation_invalid_type() -> None:
     with pytest.raises(TypeError):
         remove_punctuation(123)
 
-if __name__ == "__main__":
-    pytest.main()

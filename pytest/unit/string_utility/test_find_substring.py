@@ -164,5 +164,3 @@ def test_find_substring_invalid_substring_type() -> None:
     with pytest.raises(TypeError):
         find_substring("hello world", 123)
 
-if __name__ == "__main__":
-    pytest.main()

@@ -115,5 +115,3 @@ def test_starts_with_invalid_prefix_type() -> None:
     with pytest.raises(TypeError):
         starts_with("hello world", 123)
 
-if __name__ == "__main__":
-    pytest.main()

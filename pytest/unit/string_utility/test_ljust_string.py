@@ -110,5 +110,3 @@ def test_ljust_string_invalid_fillchar_length() -> None:
     with pytest.raises(TypeError):
         ljust_string("hello", 10, "--")
 
-if __name__ == "__main__":
-    pytest.main()

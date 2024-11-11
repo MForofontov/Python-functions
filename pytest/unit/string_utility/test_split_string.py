@@ -102,5 +102,3 @@ def test_split_string_invalid_delimiter_type() -> None:
     with pytest.raises(TypeError):
         split_string("hello world", delimiter=123)
 
-if __name__ == "__main__":
-    pytest.main()
