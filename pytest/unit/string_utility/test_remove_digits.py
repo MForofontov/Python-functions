@@ -93,5 +93,3 @@ def test_remove_digits_invalid_type() -> None:
     with pytest.raises(TypeError):
         remove_digits(12345)
 
-if __name__ == "__main__":
-    pytest.main()

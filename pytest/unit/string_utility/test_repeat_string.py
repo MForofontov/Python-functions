@@ -108,5 +108,3 @@ def test_repeat_string_invalid_repeat_count_type() -> None:
     with pytest.raises(TypeError):
         repeat_string("hello", "2")
 
-if __name__ == "__main__":
-    pytest.main()

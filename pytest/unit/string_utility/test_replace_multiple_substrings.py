@@ -108,5 +108,3 @@ def test_replace_invalid_string_type() -> None:
     with pytest.raises(TypeError):
         replace_multiple_substrings(123, {"hello": "hi"})
 
-if __name__ == "__main__":
-    pytest.main()

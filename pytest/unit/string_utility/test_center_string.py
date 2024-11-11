@@ -166,5 +166,3 @@ def test_center_string_invalid_fillchar_length() -> None:
     with pytest.raises(TypeError):
         center_string("hello world", 15, "ab")
 
-if __name__ == "__main__":
-    pytest.main()

@@ -73,6 +73,3 @@ def test_verify_password_invalid_type() -> None:
     # Test case 10: Invalid type
     with pytest.raises(TypeError):
         verify_password(12345)
-
-if __name__ == "__main__":
-    pytest.main()

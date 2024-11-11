@@ -100,5 +100,3 @@ def test_remove_non_alphanumeric_invalid_type() -> None:
     with pytest.raises(TypeError):
         remove_non_alphanumeric(123)
 
-if __name__ == "__main__":
-    pytest.main()

@@ -107,5 +107,3 @@ def test_remove_whitespace_invalid_type() -> None:
     with pytest.raises(TypeError):
         remove_whitespace(123)
 
-if __name__ == "__main__":
-    pytest.main()

@@ -72,5 +72,3 @@ def test_to_uppercase_invalid_type() -> None:
     with pytest.raises(TypeError):
         to_uppercase(12345)
 
-if __name__ == "__main__":
-    pytest.main()

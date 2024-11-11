@@ -72,5 +72,3 @@ def test_to_lowercase_invalid_type() -> None:
     with pytest.raises(TypeError):
         to_lowercase(12345)
 
-if __name__ == "__main__":
-    pytest.main()

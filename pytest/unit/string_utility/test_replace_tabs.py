@@ -116,5 +116,3 @@ def test_replace_tabs_negative_tabsize() -> None:
     with pytest.raises(ValueError):
         replace_tabs("hello\tworld", -4)
 
-if __name__ == "__main__":
-    pytest.main()

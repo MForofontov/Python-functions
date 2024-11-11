@@ -74,6 +74,3 @@ def test_truncate_string_range_invalid_end_type() -> None:
     # Test case 10: Invalid end index type
     with pytest.raises(TypeError):
         truncate_string_range("hello world", 0, "5")
-
-if __name__ == "__main__":
-    pytest.main()
