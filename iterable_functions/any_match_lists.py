@@ -15,5 +15,15 @@ def any_match_lists(list1: List[Any], list2: List[Any]) -> bool:
     -------
     bool
         True if any element of list1 is found in list2, False otherwise.
+
+    Raises
+    ------
+    TypeError
+        If list1 or list2 is not a list.
     """
+    if not isinstance(list1, list):
+        raise TypeError("list1 must be a list")
+    if not isinstance(list2, list):
+        raise TypeError("list2 must be a list")
+
     return any(elem in list2 for elem in list1)
