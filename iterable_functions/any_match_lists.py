@@ -19,11 +19,14 @@ def any_match_lists(list1: List[Any], list2: List[Any]) -> bool:
     Raises
     ------
     TypeError
-        If list1 or list2 is not a list.
+        If list1 or list2 is not a list or contains unhashable elements.
     """
     if not isinstance(list1, list):
         raise TypeError("list1 must be a list")
     if not isinstance(list2, list):
         raise TypeError("list2 must be a list")
 
-    return any(elem in list2 for elem in list1)
+    try:
+        return any(elem in list2 for elem in list1)
+    except TypeError as e:
+        raise TypeError(f"An element in the list cannot be compared: {e}")
