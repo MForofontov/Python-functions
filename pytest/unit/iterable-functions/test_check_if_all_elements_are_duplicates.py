@@ -1,4 +1,5 @@
 import pytest
+from typing import Any
 from iterable_functions.check_if_all_elements_are_duplicates import check_if_all_elements_are_duplicates
 
 def test_check_if_all_elements_are_duplicates_all_duplicates() -> None:
@@ -33,10 +34,34 @@ def test_check_if_all_elements_are_duplicates_empty_list() -> None:
     input_list: list[int] = []
     assert check_if_all_elements_are_duplicates(input_list) == False
 
+def test_check_if_all_elements_are_duplicates_strings() -> None:
+    """
+    Test the check_if_all_elements_are_duplicates function with a list of strings.
+    """
+    # Test case 5: List of strings
+    input_list: list[str] = ["a", "a", "b", "b", "c", "c"]
+    assert check_if_all_elements_are_duplicates(input_list) == True
+
+def test_check_if_all_elements_are_duplicates_mixed_types() -> None:
+    """
+    Test the check_if_all_elements_are_duplicates function with a list of mixed types.
+    """
+    # Test case 6: List of mixed types
+    input_list: list[Any] = [1, "a", 1, "a", 3.14, 3.14]
+    assert check_if_all_elements_are_duplicates(input_list) == True
+
+def test_check_if_all_elements_are_duplicates_unhashable_elements() -> None:
+    """
+    Test the check_if_all_elements_are_duplicates function with unhashable elements.
+    """
+    # Test case 7: Unhashable elements
+    input_list: list[Any] = [[1, 2], [1, 2], [3, 4], [3, 4]]
+    assert check_if_all_elements_are_duplicates(input_list) == True
+
 def test_check_if_all_elements_are_duplicates_type_error() -> None:
     """
     Test the check_if_all_elements_are_duplicates function with invalid type for input_list.
     """
-    # Test case 5: Invalid type for input_list
+    # Test case 8: Invalid type for input_list
     with pytest.raises(TypeError):
         check_if_all_elements_are_duplicates("not a list")
