@@ -37,11 +37,20 @@ def test_any_match_lists_empty_list2() -> None:
     list2: list[int] = []
     assert any_match_lists(list1, list2) == False
 
+def test_any_match_lists_two_empty_lists() -> None:
+    """
+    Test the any_match_lists function with two empty lists.
+    """
+    # Test case 5: Two empty lists
+    list1: list[int] = []
+    list2: list[int] = []
+    assert any_match_lists(list1, list2) == False
+
 def test_any_match_lists_type_error_list1() -> None:
     """
     Test the any_match_lists function with invalid type for list1.
     """
-    # Test case 5: Invalid type for list1
+    # Test case 6: Invalid type for list1
     with pytest.raises(TypeError):
         any_match_lists("not a list", [1, 2, 3])
 
@@ -49,7 +58,6 @@ def test_any_match_lists_type_error_list2() -> None:
     """
     Test the any_match_lists function with invalid type for list2.
     """
-    # Test case 6: Invalid type for list2
+    # Test case 7: Invalid type for list2
     with pytest.raises(TypeError):
         any_match_lists([1, 2, 3], "not a list")
-
