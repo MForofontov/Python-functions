@@ -11,5 +11,13 @@ def create_whitespace_string(input_string: str) -> str:
     -------
     str
         String containing the same number of white spaces as the length of the input string.
+
+    Raises
+    ------
+    TypeError
+        If input_string is not a string.
     """
+    if not isinstance(input_string, str):
+        raise TypeError("input_string must be a string")
+
     return " " * len(input_string)
