@@ -13,5 +13,16 @@ def convert_set_elements_to_strings(input_set: Set[Any]) -> Set[str]:
     -------
     set
         A set with all elements converted to strings.
+
+    Raises
+    ------
+    TypeError
+        If input_set is not a set or contains elements that cannot be converted to strings.
     """
-    return {str(element) for element in input_set}
+    if not isinstance(input_set, set):
+        raise TypeError("input_set must be a set")
+
+    try:
+        return {str(element) for element in input_set}
+    except Exception as e:
+        raise TypeError(f"An element in the set cannot be converted to a string: {e}")
