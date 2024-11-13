@@ -15,7 +15,21 @@ def divide_list_into_n_chunks(list_to_divide: List[Any], n: int) -> List[List[An
     -------
     list
         A list of sublists created by dividing the input list.
+
+    Raises
+    ------
+    TypeError
+        If list_to_divide is not a list or n is not an integer.
+    ValueError
+        If n is less than or equal to 0.
     """
+    if not isinstance(list_to_divide, list):
+        raise TypeError("list_to_divide must be a list")
+    if not isinstance(n, int):
+        raise TypeError("n must be an integer")
+    if n <= 0:
+        raise ValueError("n must be greater than 0")
+
     sublists = []
     list_length = len(list_to_divide)
     sublist_size, remainder = divmod(list_length, n)

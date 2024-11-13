@@ -1,5 +1,5 @@
 from typing import List
-from decompress_number import decompress_number
+from compression_decompression_functions.decompress_number import decompress_number
 
 def polyline_decoding(text: str) -> List[float]:
     """

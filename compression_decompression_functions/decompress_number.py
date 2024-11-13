@@ -16,7 +16,17 @@ def decompress_number(text: str, index: int) -> Tuple[int, int]:
     tuple
         Index to start decoding the next number and the number decoded
         in the current function call.
+
+    Raises
+    ------
+    TypeError
+        If text is not a string or index is not an integer.
     """
+    if not isinstance(text, str):
+        raise TypeError("text must be a string")
+    if not isinstance(index, int):
+        raise TypeError("index must be an integer")
+
     number = 0
     bitwise_shift = 0
 

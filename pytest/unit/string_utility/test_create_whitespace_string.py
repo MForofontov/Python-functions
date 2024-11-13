@@ -1,5 +1,5 @@
 import pytest
-from iterable_functions.create_whitespace_string import create_whitespace_string
+from strings_utility.create_whitespace_string import create_whitespace_string
 
 def test_create_whitespace_string_success() -> None:
     """
