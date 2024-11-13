@@ -15,8 +15,16 @@ def find_sublist_index(input_list_of_lists: List[List[Any]], target_value: Any) 
     -------
     int or None
         The index of the sublist containing the element, or None if the string is not found in any sublist.
+
+    Raises
+    ------
+    TypeError
+        If input_list_of_lists is not a list of lists.
     """
-    try:
-        return input_list_of_lists.index(target_value)
-    except ValueError:
-        return None
+    if not isinstance(input_list_of_lists, list) or not all(isinstance(sublist, list) for sublist in input_list_of_lists):
+        raise TypeError("input_list_of_lists must be a list of lists")
+
+    for index, sublist in enumerate(input_list_of_lists):
+        if target_value in sublist:
+            return index
+    return None
