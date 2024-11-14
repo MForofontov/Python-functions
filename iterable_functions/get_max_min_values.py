@@ -1,17 +1,31 @@
-from typing import List, Any, Union, Tuple
+from typing import List, Set, Tuple, Union
 
-def get_max_min_values(input_list: List[Union[int, float]]) -> Tuple[Union[int, float], Union[int, float]]:
+def get_max_min_values(input_collection: Union[List[Union[int, float]], Set[Union[int, float]], Tuple[Union[int, float], ...]]) -> Tuple[Union[int, float], Union[int, float]]:
     """
-    From an input list, return the maximum and minimum integer or float values.
+    From an input list, set, or tuple, return the maximum and minimum integer or float values.
 
     Parameters
     ----------
-    input_list : list[int] or list[float]
-        List containing integer or float values.
+    input_collection : list[int] or list[float] or set[int] or set[float] or tuple[int] or tuple[float]
+        Collection containing integer or float values.
 
     Returns
     -------
     tuple
-        A tuple containing the largest and smallest values in the input list.
+        A tuple containing the largest and smallest values in the input collection.
+
+    Raises
+    ------
+    TypeError
+        If input_collection is not a list, set, or tuple, or contains non-numeric elements.
+    ValueError
+        If input_collection is empty.
     """
-    return max(input_list), min(input_list)
+    if not isinstance(input_collection, (list, set, tuple)):
+        raise TypeError("input_collection must be a list, set, or tuple")
+    if not all(isinstance(item, (int, float)) for item in input_collection):
+        raise TypeError("input_collection must contain only integers or floats")
+    if not input_collection:
+        raise ValueError("input_collection must not be empty")
+
+    return max(input_collection), min(input_collection)
