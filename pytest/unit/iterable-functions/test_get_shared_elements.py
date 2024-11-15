@@ -91,3 +91,11 @@ def test_get_shared_elements_type_error_elements() -> None:
     # Test case 8: Invalid elements in dict_
     with pytest.raises(TypeError):
         get_shared_elements({"list1": [1, 2], "list2": "not a list"})
+
+def test_get_shared_elements_unhashable_elements() -> None:
+    """
+    Test the get_shared_elements function with unhashable elements in sublists.
+    """
+    # Test case 9: Unhashable elements in sublists
+    with pytest.raises(ValueError):
+        get_shared_elements({"list1": [1, 2], "list2": [{3: 4}, 5]})
