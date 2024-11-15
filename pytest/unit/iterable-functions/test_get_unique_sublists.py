@@ -71,3 +71,11 @@ def test_get_unique_sublists_type_error_elements() -> None:
     # Test case 8: Invalid elements in list_of_lists
     with pytest.raises(TypeError):
         get_unique_sublists([[1, 2], "not a list"])
+
+def test_get_unique_sublists_unhashable_elements() -> None:
+    """
+    Test the get_unique_sublists function with unhashable elements in sublists.
+    """
+    # Test case 9: Unhashable elements in sublists
+    with pytest.raises(ValueError):
+        get_unique_sublists([[1, 2], [{3: 4}, 5]])
