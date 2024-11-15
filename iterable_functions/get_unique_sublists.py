@@ -13,7 +13,15 @@ def get_unique_sublists(list_of_lists: List[List[Any]]) -> List[List[Any]]:
     -------
     list
         List containing unique sublists.
+
+    Raises
+    ------
+    TypeError
+        If list_of_lists is not a list of lists.
     """
+    if not isinstance(list_of_lists, list) or not all(isinstance(sublist, list) for sublist in list_of_lists):
+        raise TypeError("list_of_lists must be a list of lists")
+
     seen = set()
     unique_sublists = []
     for sublist in list_of_lists:
