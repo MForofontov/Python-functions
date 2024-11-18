@@ -1,7 +1,7 @@
 from typing import Dict, List, Union
-from remove_by_regex import remove_by_regex
+import re
 
-def identify_string_in_dict_lists_regex(target_value: str, dict_of_lists: Dict[Union[str, int], List[List[str]]], regex: bool = False) -> Union[str, int, bool]:
+def identify_string_in_dict_lists_regex(target_value: str, dict_of_lists: Dict[Union[str, int], List[List[str]]], regex: str = None) -> Union[str, int, bool]:
     """
     Identifies if a string is present in any list inside a dictionary.
 
@@ -11,16 +11,34 @@ def identify_string_in_dict_lists_regex(target_value: str, dict_of_lists: Dict[U
         The value to find.
     dict_of_lists : dict
         A dictionary where the values are lists of lists.
-    regex : bool, optional
+    regex : str, optional
         A regex pattern to search for in the lists.
 
     Returns
     -------
     int or str or bool
         The key of the entry where the string is present, or False if not found.
+
+    Raises
+    ------
+    TypeError
+        If target_value is not a string, dict_of_lists is not a dictionary, or regex is not a string or None.
     """
+    if not isinstance(target_value, str):
+        raise TypeError("target_value must be a string")
+    if not isinstance(dict_of_lists, dict):
+        raise TypeError("dict_of_lists must be a dictionary")
+    if not all(isinstance(value, list) and all(isinstance(sublist, list) for sublist in value) for value in dict_of_lists.values()):
+        raise TypeError("All values in dict_of_lists must be lists of lists")
+    if regex is not None and not isinstance(regex, str):
+        raise TypeError("regex must be a string or None")
+
     for key, lists in dict_of_lists.items():
         for list_ in lists:
-            if target_value in [remove_by_regex(l, regex) for l in list_] if regex else list_:
-                return key
+            if regex:
+                if any(re.search(regex, item) for item in list_):
+                    return key
+            else:
+                if target_value in list_:
+                    return key
     return False
