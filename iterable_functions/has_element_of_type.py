@@ -15,7 +15,17 @@ def has_element_of_type(input_list: List[Any], target_type: type) -> bool:
     -------
     bool
         True if the target type is found in the input list, False otherwise.
+
+    Raises
+    ------
+    TypeError
+        If input_list is not a list or target_type is not a type.
     """
+    if not isinstance(input_list, list):
+        raise TypeError("input_list must be a list")
+    if not isinstance(target_type, type):
+        raise TypeError("target_type must be a type")
+
     for element in input_list:
         if isinstance(element, target_type):
             return True
