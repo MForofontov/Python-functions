@@ -16,5 +16,17 @@ def regex_present(regex_list: List[str], string: str) -> bool:
     -------
     bool
         True if any regex is found in the string, False otherwise.
+
+    Raises
+    ------
+    TypeError
+        If regex_list is not a list of strings or string is not a string.
     """
+    if not isinstance(regex_list, list):
+        raise TypeError("regex_list must be a list")
+    if not all(isinstance(regex, str) for regex in regex_list):
+        raise TypeError("all elements in regex_list must be strings")
+    if not isinstance(string, str):
+        raise TypeError("string must be a string")
+
     return any(re.search(regex, string) for regex in regex_list)
