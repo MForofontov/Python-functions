@@ -17,5 +17,17 @@ def replace_by_regex(string: str, pattern: str, replacement: str) -> str:
     -------
     str
         A new string with all matches of `pattern` replaced by `replacement`.
+
+    Raises
+    ------
+    TypeError
+        If string, pattern, or replacement is not a string.
     """
+    if not isinstance(string, str):
+        raise TypeError("string must be a string")
+    if not isinstance(pattern, str):
+        raise TypeError("pattern must be a string")
+    if not isinstance(replacement, str):
+        raise TypeError("replacement must be a string")
+
     return re.sub(pattern, replacement, string)
