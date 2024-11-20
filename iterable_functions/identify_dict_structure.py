@@ -32,7 +32,7 @@ def identify_dict_structure(list_of_dicts: List[Dict[str, Any]]) -> Dict[str, No
             keys[full_key] = None
             if isinstance(value, dict):
                 extract_keys(value, full_key)
-            elif isinstance(value, list):
+            elif isinstance(value, list) or isinstance(value, tuple):
                 for item in value:
                     if isinstance(item, dict):
                         extract_keys(item, full_key)

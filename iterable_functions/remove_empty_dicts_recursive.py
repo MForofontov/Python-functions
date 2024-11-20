@@ -13,10 +13,21 @@ def remove_empty_dicts_recursive(nested_dict: Dict[Any, Any]) -> Dict[Any, Any]:
     -------
     dict
         The nested dictionary with empty dictionaries removed.
+
+    Raises
+    ------
+    TypeError
+        If nested_dict is not a dictionary.
     """
-    if isinstance(nested_dict, dict):
-        for key in list(nested_dict.keys()):
-            nested_dict[key] = remove_empty_dicts_recursive(nested_dict[key])
-            if not nested_dict[key] and not isinstance(nested_dict[key], (bool, int, float)):
-                del nested_dict[key]
-    return nested_dict
+    if not isinstance(nested_dict, dict):
+        raise TypeError("nested_dict must be a dictionary")
+
+    def _remove_empty(d: Dict[Any, Any]) -> Dict[Any, Any]:
+        if isinstance(d, dict):
+            for key in list(d.keys()):
+                d[key] = _remove_empty(d[key])
+                if not d[key] and not isinstance(d[key], (bool, int, float)):
+                    del d[key]
+        return d
+
+    return _remove_empty(nested_dict)
