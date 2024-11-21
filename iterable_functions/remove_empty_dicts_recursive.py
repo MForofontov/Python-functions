@@ -26,7 +26,7 @@ def remove_empty_dicts_recursive(nested_dict: Dict[Any, Any]) -> Dict[Any, Any]:
         if isinstance(d, dict):
             for key in list(d.keys()):
                 d[key] = _remove_empty(d[key])
-                if not d[key] and not isinstance(d[key], (bool, int, float)):
+                if isinstance(d[key], dict) and not d[key]:
                     del d[key]
         return d
 
