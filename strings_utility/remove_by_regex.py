@@ -2,7 +2,7 @@ import re
 
 def remove_by_regex(string: str, pattern: str) -> str:
     """
-    Remove all occurrences of a pattern from a string.
+    Remove all occurrences of a pattern from a string, ensuring no extra spaces are left.
 
     Parameters
     ----------
@@ -26,4 +26,7 @@ def remove_by_regex(string: str, pattern: str) -> str:
     if not isinstance(pattern, str):
         raise TypeError("pattern must be a string")
 
-    return re.sub(pattern, '', string)
+    # Adjust the pattern to also match surrounding spaces
+    adjusted_pattern = r'\s*' + pattern + r'\s*'
+    result = re.sub(adjusted_pattern, ' ', string).strip()
+    return re.sub(r'\s+', ' ', result)
