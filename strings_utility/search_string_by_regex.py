@@ -26,6 +26,8 @@ def search_string_by_regex(pattern: str, string: str) -> Union[str, None]:
         raise TypeError("pattern must be a string")
     if not isinstance(string, str):
         raise TypeError("string must be a string")
+    if pattern == "":
+        return None
 
     match = re.search(pattern, string)
     return match.group(0) if match else None
