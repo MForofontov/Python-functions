@@ -2,7 +2,8 @@ import re
 
 def replace_by_regex(string: str, pattern: str, replacement: str) -> str:
     """
-    Replace all occurrences of a regex pattern within a string with a specified replacement.
+    Replace all occurrences of a regex pattern within a string with a specified replacement,
+    ensuring no extra spaces are left.
 
     Parameters
     ----------
@@ -30,4 +31,7 @@ def replace_by_regex(string: str, pattern: str, replacement: str) -> str:
     if not isinstance(replacement, str):
         raise TypeError("replacement must be a string")
 
-    return re.sub(pattern, replacement, string)
+    # Adjust the pattern to also match surrounding spaces
+    adjusted_pattern = r'\s*' + pattern + r'\s*'
+    result = re.sub(adjusted_pattern, ' ' + replacement + ' ', string).strip()
+    return re.sub(r'\s+', ' ', result)

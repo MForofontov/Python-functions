@@ -1,5 +1,5 @@
 from typing import List, Any
-from any_match_lists import any_match_lists
+from iterable_functions.any_match_lists import any_match_lists
 
 def partially_contains_sublist(main_list: List[Any], list_of_lists: List[List[Any]]) -> bool:
     """

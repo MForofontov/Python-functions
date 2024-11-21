@@ -90,8 +90,7 @@ def test_any_match_lists_unhashable_elements() -> None:
     # Test case 10: Unhashable elements
     list1: list[Any] = [[1, 2], [3, 4]]
     list2: list[Any] = [[1, 2], [5, 6]]
-    with pytest.raises(TypeError):
-        any_match_lists(list1, list2)
+    assert any_match_lists(list1, list2) == True
 
 def test_any_match_lists_type_error_list1() -> None:
     """

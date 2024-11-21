@@ -53,13 +53,15 @@ def test_remove_empty_dicts_recursive_mixed_types() -> None:
         "a": 1,
         "b": {"c": {}, "d": 2},
         "e": {"f": {"g": {}, "h": 3}},
-        "i": []
+        "i": [],
+        "j": {"k": object(), "l": {}, "m": True}
     }
     expected_output = {
         "a": 1,
         "b": {"d": 2},
         "e": {"f": {"h": 3}},
-        "i": []
+        "i": [],
+        "j": {"k": object(), "m": True}
     }
     assert remove_empty_dicts_recursive(nested_dict) == expected_output
 
