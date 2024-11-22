@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from compression_decompression_functions.decompress_number import decompress_number
 
-def polyline_decoding(encoded_text: str) -> List[float]:
+def polyline_decoding_list_of_ints(encoded_text: str) -> List[float]:
     """
     Decode a list of integers compressed with polyline encoding.
 
@@ -23,12 +23,12 @@ def polyline_decoding(encoded_text: str) -> List[float]:
     if not encoded_text:
         raise ValueError("Encoded text cannot be empty.")
 
-    decoded_numbers = []
-    index = 0
-    last_number = 0
+    decoded_numbers: List[int] = []
+    index: int = 0
+    last_number: int = 0
 
     # Extract precision from the first character
-    precision = ord(encoded_text[index]) - 63
+    precision: int = ord(encoded_text[index]) - 63
     index += 1
 
     while index < len(encoded_text):
@@ -41,5 +41,5 @@ def polyline_decoding(encoded_text: str) -> List[float]:
         decoded_numbers.append(last_number)
 
     # Adjust numbers for precision
-    scale_factor = 10 ** (-precision)
+    scale_factor: float = 10 ** (-precision)
     return [round(number * scale_factor, precision) for number in decoded_numbers]
