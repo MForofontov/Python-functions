@@ -1,9 +1,8 @@
-import gzip
-import shutil
+import lzma
 
-def compress_file_gzip(input_file: str, output_file: str) -> None:
+def compress_file_lzma(input_file: str, output_file: str) -> None:
     """
-    Compress a file using gzip.
+    Compress a file using lzma.
 
     Parameters
     ----------
@@ -30,10 +29,10 @@ def compress_file_gzip(input_file: str, output_file: str) -> None:
     try:
         # Open the input file in binary read mode
         with open(input_file, 'rb') as f_in:
-            # Open the output file in binary write mode with gzip compression
-            with gzip.open(output_file, 'wb') as f_out:
-                # Copy the contents of the input file to the output file
-                shutil.copyfileobj(f_in, f_out)
+            # Open the output file in binary write mode with lzma compression
+            with lzma.open(output_file, 'wb') as f_out:
+                # Write the contents of the input file to the output file
+                f_out.writelines(f_in)
     except FileNotFoundError:
         # Raise a FileNotFoundError if the input file does not exist
         raise FileNotFoundError(f"The input file {input_file} does not exist.")
