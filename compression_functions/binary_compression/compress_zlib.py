@@ -22,12 +22,16 @@ def compress_zlib(data: bytes) -> bytes:
     ValueError
         If an error occurs during compression.
     """
+    # Check if data is bytes
     if not isinstance(data, bytes):
         raise TypeError("data must be bytes")
 
     try:
+        # Compress the data using zlib
         compressed: bytes = zlib.compress(data)
+        # Encode the compressed data with base64
         encoded: bytes = base64.b64encode(compressed)
         return encoded
     except Exception as e:
+        # Raise a ValueError if an error occurs during compression
         raise ValueError(f"An error occurred during compression: {e}")

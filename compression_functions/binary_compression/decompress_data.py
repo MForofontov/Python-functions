@@ -8,9 +8,22 @@ def decompress_data(compressed_data: bytes, algorithm: str = 'gzip') -> bytes:
     """
     Decompress binary data using the specified algorithm.
 
-    :param compressed_data: Compressed binary data.
-    :param algorithm: Compression algorithm to use ('gzip', 'bz2', 'lzma', 'snappy', 'zstd').
-    :return: Decompressed binary data.
+    Parameters
+    ----------
+    compressed_data : bytes
+        Compressed binary data.
+    algorithm : str, optional
+        Compression algorithm to use ('gzip', 'bz2', 'lzma', 'snappy', 'zstd').
+
+    Returns
+    -------
+    bytes
+        Decompressed binary data.
+
+    Raises
+    ------
+    ValueError
+        If the specified algorithm is not supported.
     """
     if algorithm == 'gzip':
         return decompress_gzip(compressed_data)
