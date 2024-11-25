@@ -34,8 +34,12 @@ def compress_tar(input_path: str, output_tar: str) -> None:
     try:
         # Open the output tar file in write mode with gzip compression
         with tarfile.open(output_tar, 'w:gz') as tar:
-            # Add the input path to the tar file
-            tar.add(input_path, arcname=os.path.basename(input_path))
+            # If the input path is a directory, add the directory and all its contents to the tar file
+            if os.path.isdir(input_path):
+                tar.add(input_path, arcname=os.path.basename(input_path))
+            else:
+                # If the input path is a file, add the file to the tar file
+                tar.add(input_path, arcname=os.path.basename(input_path))
     except IOError as e:
         # Raise an IOError if an I/O error occurs during compression
         raise IOError(f"An I/O error occurred during compression: {e}")
