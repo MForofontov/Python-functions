@@ -14,11 +14,18 @@ def compress_file_gzip(input_file: str, output_file: str) -> None:
 
     Raises
     ------
+    TypeError
+        If input_file or output_file is not a string.
     FileNotFoundError
         If the input file does not exist.
     IOError
         If an I/O error occurs during compression.
     """
+    if not isinstance(input_file, str):
+        raise TypeError("input_file must be a string")
+    if not isinstance(output_file, str):
+        raise TypeError("output_file must be a string")
+
     try:
         with open(input_file, 'rb') as f_in:
             with gzip.open(output_file, 'wb') as f_out:

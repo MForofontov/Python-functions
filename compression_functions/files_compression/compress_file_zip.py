@@ -1,27 +1,35 @@
-import zipfile
+import bz2
 
-def compress_file_zip(input_file: str, output_zip: str) -> None:
+def decompress_file_bz2(input_file: str, output_file: str) -> None:
     """
-    Compress a file using zip.
+    Decompress a bz2-compressed file.
 
     Parameters
     ----------
     input_file : str
-        The path to the input file to be compressed.
-    output_zip : str
-        The path to the output zip file to save the compressed data.
+        The path to the input bz2-compressed file.
+    output_file : str
+        The path to the output file to save the decompressed data.
 
     Raises
     ------
+    TypeError
+        If input_file or output_file is not a string.
     FileNotFoundError
         If the input file does not exist.
     IOError
-        If an I/O error occurs during compression.
+        If an I/O error occurs during decompression.
     """
+    if not isinstance(input_file, str):
+        raise TypeError("input_file must be a string")
+    if not isinstance(output_file, str):
+        raise TypeError("output_file must be a string")
+
     try:
-        with zipfile.ZipFile(output_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            zipf.write(input_file, arcname=input_file.split('/')[-1])
+        with bz2.open(input_file, 'rb') as f_in:
+            with open(output_file, 'wb') as f_out:
+                f_out.writelines(f_in)
     except FileNotFoundError:
         raise FileNotFoundError(f"The input file {input_file} does not exist.")
     except IOError as e:
-        raise IOError(f"An I/O error occurred during compression: {e}")
+        raise IOError(f"An I/O error occurred during decompression: {e}")
