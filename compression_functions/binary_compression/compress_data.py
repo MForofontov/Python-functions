@@ -29,6 +29,10 @@ def compress_data(data: bytes, algorithm: str = 'gzip', level: int = 3) -> bytes
     TypeError
         If data is not bytes or level is not an integer.
     """
+    if not isinstance(data, bytes):
+        raise TypeError("data must be bytes")
+    if not isinstance(level, int):
+        raise TypeError("level must be an integer")
 
     if algorithm == 'gzip':
         return compress_gzip(data)
