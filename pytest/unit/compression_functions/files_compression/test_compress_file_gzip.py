@@ -1,8 +1,7 @@
 import pytest
 import gzip
-import shutil
 import os
-from compression_functions.binary_compression.compress_file_gzip import compress_file_gzip
+from compression_functions.files_compression.compress_file_gzip import compress_file_gzip
 
 def test_compress_file_gzip_basic_compression(tmp_path) -> None:
     """
