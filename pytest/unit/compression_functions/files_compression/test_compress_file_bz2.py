@@ -1,7 +1,7 @@
 import pytest
 import bz2
 import os
-from compression_functions.files_compression.compress_file_bz2 import compress_file_bz2
+from compression_functions.binary_compression.compress_file_bz2 import compress_file_bz2
 
 def test_compress_file_bz2_basic(tmp_path) -> None:
     """
@@ -17,12 +17,16 @@ def test_compress_file_bz2_basic(tmp_path) -> None:
     
     compress_file_bz2(str(input_file), str(output_file))
     
-    with bz2.open(output_file, 'rb') as f:
-        compressed_data = f.read()
+    # Check if the output file exists
+    assert output_file.exists(), "Output file should exist"
     
-    assert compressed_data == data, "Decompressed data should match the original data"
+    # Decompress the data to verify
+    with bz2.open(output_file, 'rb') as f:
+        decompressed_data = f.read()
+    
+    assert decompressed_data == data, "Decompressed data should match the original data"
 
-def test_compress_file_bz2_empty(tmp_path) -> None:
+def test_compress_file_bz2_empty_file_compression_and_verification(tmp_path) -> None:
     """
     Test the compress_file_bz2 function with an empty file.
     """
@@ -35,12 +39,16 @@ def test_compress_file_bz2_empty(tmp_path) -> None:
     
     compress_file_bz2(str(input_file), str(output_file))
     
-    with bz2.open(output_file, 'rb') as f:
-        compressed_data = f.read()
+    # Check if the output file exists
+    assert output_file.exists(), "Output file should exist"
     
-    assert compressed_data == b"", "Decompressed data should match the original data"
+    # Decompress the data to verify
+    with bz2.open(output_file, 'rb') as f:
+        decompressed_data = f.read()
+    
+    assert decompressed_data == b"", "Decompressed data should match the original data"
 
-def test_compress_file_bz2_large_file(tmp_path) -> None:
+def test_compress_file_bz2_large_file_compression_and_verification(tmp_path) -> None:
     """
     Test the compress_file_bz2 function with a large file.
     """
@@ -54,10 +62,17 @@ def test_compress_file_bz2_large_file(tmp_path) -> None:
     
     compress_file_bz2(str(input_file), str(output_file))
     
-    with bz2.open(output_file, 'rb') as f:
-        compressed_data = f.read()
+    # Check if the output file exists
+    assert output_file.exists(), "Output file should exist"
     
-    assert compressed_data == data, "Decompressed data should match the original data"
+    # Check if the compressed file is smaller than the original file
+    assert output_file.stat().st_size < input_file.stat().st_size, "Compressed file should be smaller than the original file"
+    
+    # Decompress the data to verify
+    with bz2.open(output_file, 'rb') as f:
+        decompressed_data = f.read()
+    
+    assert decompressed_data == data, "Decompressed data should match the original data"
 
 def test_compress_file_bz2_invalid_input_type(tmp_path) -> None:
     """
@@ -94,11 +109,11 @@ def test_compress_file_bz2_file_not_found(tmp_path) -> None:
     with pytest.raises(FileNotFoundError):
         compress_file_bz2(str(input_file), str(output_file))
 
-def test_compress_file_bz2_io_error(tmp_path) -> None:
+def test_compress_file_bz2_io_error_on_read_only_output_directory(tmp_path) -> None:
     """
-    Test the compress_file_bz2 function handling of I/O errors.
+    Test the compress_file_bz2 function handling of I/O errors on read-only output directory.
     """
-    # Test case 7: Handling of I/O errors
+    # Test case 7: Handling of I/O errors on read-only output directory
     input_file = tmp_path / "input.txt"
     output_file = tmp_path / "output.bz2"
     data = b"hello world"
@@ -115,3 +130,50 @@ def test_compress_file_bz2_io_error(tmp_path) -> None:
     finally:
         # Restore permissions to delete the temporary directory
         os.chmod(tmp_path, 0o700)
+
+def test_compress_file_bz2_io_error_on_read_only_input_file(tmp_path) -> None:
+    """
+    Test the compress_file_bz2 function with permission error on input file.
+    """
+    # Test case 8: Permission error on input file
+    input_file = tmp_path / "input.txt"
+    output_file = tmp_path / "output.bz2"
+    data = b"hello world"
+    
+    with open(input_file, 'wb') as f:
+        f.write(data)
+    
+    # Simulate a permission error by making the input file read-only
+    os.chmod(input_file, 0o400)
+    
+    try:
+        with pytest.raises(IOError):
+            compress_file_bz2(str(input_file), str(output_file))
+    finally:
+        # Restore permissions to delete the temporary file
+        os.chmod(input_file, 0o600)
+
+def test_compress_file_bz2_io_error_on_read_only_output_file(tmp_path) -> None:
+    """
+    Test the compress_file_bz2 function with read-only output file.
+    """
+    # Test case 9: Read-only output file
+    input_file = tmp_path / "input.txt"
+    output_file = tmp_path / "output.bz2"
+    data = b"hello world"
+    
+    with open(input_file, 'wb') as f:
+        f.write(data)
+    
+    with open(output_file, 'wb') as f:
+        pass
+    
+    # Simulate a read-only output file
+    os.chmod(output_file, 0o400)
+    
+    try:
+        with pytest.raises(IOError):
+            compress_file_bz2(str(input_file), str(output_file))
+    finally:
+        # Restore permissions to delete the temporary file
+        os.chmod(output_file, 0o600)
