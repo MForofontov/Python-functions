@@ -4,6 +4,18 @@ This repository contains various Python functions and utilities organized into d
 
 ## Folder Structure
 
+The repository is organized into several folders, each containing specific functionalities:
+
+- **asyncio-functions**: Contains functions and utilities for asynchronous programming using `asyncio`.
+- **compression_functions**: Includes functions for compressing and decompressing data using various algorithms such as BZ2, GZIP, LZMA, Snappy, Zlib, and Zstandard.
+- **file-functions**: Provides utilities for file operations such as creating directories, reading and writing tabular data, and handling file I/O.
+- **iterable_functions**: Contains functions for manipulating and processing iterables, such as lists and sets.
+- **linux-functions**: Includes utilities for monitoring and managing Linux system resources and processes.
+- **multiprocessing-functions**: Provides functions for parallel processing using Python's `multiprocessing` module.
+- **pandas-functions**: Contains utilities for working with `pandas` DataFrames, including filtering, merging, reading, and writing data.
+- **statistics-functions**: Includes functions for statistical calculations such as mean, median, mode, standard deviation, and variance.
+- **strings_utility**: Provides various string manipulation functions, including capitalization, centering, joining, splitting, and more.
+- **wrappers**: Contains decorator functions for enhancing and modifying the behavior of other functions.
 
 ## Requirements
 
@@ -20,6 +32,25 @@ The repository uses the following Python packages, as specified in `requirements
 - python-snappy==0.7.3
 - tomli==2.1.0
 - zstandard==0.23.0
+
+## Installation
+
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/yourusername/compression-functions.git
+    cd compression-functions
+    ```
+
+2. Create a virtual environment and activate it:
+    ```sh
+    python -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
+
+3. Install the required dependencies:
+    ```sh
+    pip install -r requirements.txt
+    ```
 
 ## Running Tests
 
