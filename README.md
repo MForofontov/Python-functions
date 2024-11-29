@@ -37,8 +37,8 @@ The repository uses the following Python packages, as specified in `requirements
 
 1. Clone the repository:
     ```sh
-    git clone https://github.com/yourusername/compression-functions.git
-    cd compression-functions
+    git clone https://github.com/MForofontov/Python-functions
+    cd Python-functions
     ```
 
 2. Create a virtual environment and activate it:
@@ -56,7 +56,7 @@ The repository uses the following Python packages, as specified in `requirements
 
 To run the unit tests, use the following command:
 ```sh
-pytest
+pytest --alluredir "path/to/allure/output" --cov="path/to/code/to/calculate/cov" --cov-report=xml:"path/to/xml/output
 ```
 
 ## Contributing
