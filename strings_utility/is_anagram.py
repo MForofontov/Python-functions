@@ -1,6 +1,6 @@
 from collections import Counter
 
-def is_anagram(str1: str, str2: str) -> bool:
+def is_anagram(string_1: str, string_2: str) -> bool:
     """
     Check if two strings are anagrams.
 

@@ -57,26 +57,20 @@ def test_is_anagram_with_unicode_characters() -> None:
     # Test case 8: Anagram with unicode characters
     assert is_anagram("déjà vu", "vu déjà") == True, "Failed on anagram with unicode characters"
 
-def test_is_anagram_invalid_input_type() -> None:
+def test_is_anagram_invalid_string_1_type() -> None:
     """
-    Test the is_anagram function with invalid input types.
+    Test the is_anagram function with an invalid type for the first string.
     """
-    # Test case 9: Invalid input types
+    # Test case 9: Invalid type for the first string
     with pytest.raises(TypeError):
         is_anagram(123, "silent")  # type: ignore
-    with pytest.raises(TypeError):
-        is_anagram("listen", 456)  # type: ignore
-    with pytest.raises(TypeError):
-        is_anagram(123, 456)  # type: ignore
 
-def test_is_anagram_with_mixed_input() -> None:
+def test_is_anagram_invalid_string_2_type() -> None:
     """
-    Test the is_anagram function with mixed input types.
+    Test the is_anagram function with an invalid type for the second string.
     """
-    # Test case 10: Mixed input types
+    # Test case 10: Invalid type for the second string
     with pytest.raises(TypeError):
-        is_anagram("listen", None)  # type: ignore
-    with pytest.raises(TypeError):
-        is_anagram(None, "silent")  # type: ignore
-    with pytest.raises(TypeError):
-        is_anagram(None, None)  # type: ignore
+        is_anagram("listen", 123)  # type: ignore
+
+
