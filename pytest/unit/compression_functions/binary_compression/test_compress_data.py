@@ -52,7 +52,7 @@ def test_compress_data_zstd() -> None:
     """
     # Test case 5: Zstd compression
     data: bytes = b"hello world"
-    compressed_data: bytes = compress_data(data, algorithm='zstd', level=34)
+    compressed_data: bytes = compress_data(data, algorithm='zstd', level=4)
     compressor = zstd.ZstdCompressor(level=4)
     expected_compressed_data: bytes = compressor.compress(data)
     assert compressed_data == expected_compressed_data, "Compressed data should match expected zstd compression"
