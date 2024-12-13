@@ -1,3 +1,4 @@
+import os
 import zipfile
 
 def decompress_file_zip(input_zip: str, output_dir: str) -> None:
@@ -27,6 +28,9 @@ def decompress_file_zip(input_zip: str, output_dir: str) -> None:
         raise TypeError("output_dir must be a string")
 
     try:
+        # Ensure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+
         # Open the input zip-compressed file in read mode
         with zipfile.ZipFile(input_zip, 'r') as zipf:
             # Extract all files to the specified output directory

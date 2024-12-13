@@ -1,3 +1,4 @@
+import os
 import tarfile
 
 def decompress_file_tar(input_tar: str, output_dir: str) -> None:
@@ -27,6 +28,9 @@ def decompress_file_tar(input_tar: str, output_dir: str) -> None:
         raise TypeError("output_dir must be a string")
 
     try:
+        # Ensure the output directory exists
+        os.makedirs(output_dir, exist_ok=True)
+
         # Open the input tar-compressed file in read mode with gzip compression
         with tarfile.open(input_tar, 'r:gz') as tar:
             # Extract all files to the specified output directory
