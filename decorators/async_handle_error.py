@@ -1,5 +1,6 @@
 from typing import Callable, Any
 import asyncio
+import inspect
 
 def async_handle_error(error_message: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
@@ -28,7 +29,15 @@ def async_handle_error(error_message: str) -> Callable[[Callable[..., Any]], Cal
         -------
         Callable[..., Any]
             The wrapped function with error handling.
+
+        Raises
+        ------
+        TypeError
+            If the function is not asynchronous.
         """
+        if not inspect.iscoroutinefunction(func):
+            raise TypeError("The function to be decorated must be asynchronous")
+
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             """
             Wrapper function to handle errors in the asynchronous function.
