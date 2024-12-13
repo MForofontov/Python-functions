@@ -149,11 +149,11 @@ def test_decompress_file_zip_io_error_on_output_dir(tmp_path) -> None:
         # Restore permissions to delete the temporary directory
         os.chmod(output_dir, 0o700)
 
-def test_decompress_file_zip_permission_error_on_input_file(tmp_path) -> None:
+def test_decompress_file_zip_no_permission_on_input_file(tmp_path) -> None:
     """
-    Test the decompress_file_zip function with permission error on input file.
+    Test the decompress_file_zip function with no permission on input file.
     """
-    # Test case 8: Permission error on input file
+    # Test case 8: No permission on input file
     compressed_file = tmp_path / "input.zip"
     output_dir = tmp_path / "output"
     data = b"hello world"
@@ -166,11 +166,11 @@ def test_decompress_file_zip_permission_error_on_input_file(tmp_path) -> None:
     with zipfile.ZipFile(compressed_file, 'w') as zipf:
         zipf.write(input_file, arcname="input.txt")
     
-    # Simulate a permission error by making the input file read-only
-    os.chmod(compressed_file, 0o400)
+    # Remove all permissions from the input file
+    os.chmod(compressed_file, 0o000)
     
     try:
-        with pytest.raises(IOError):
+        with pytest.raises(PermissionError):
             decompress_file_zip(str(compressed_file), str(output_dir))
     finally:
         # Restore permissions to delete the temporary file
