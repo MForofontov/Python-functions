@@ -133,11 +133,11 @@ def test_decompress_file_bz2_io_error_on_output_file(tmp_path) -> None:
         # Restore permissions to delete the temporary directory
         os.chmod(tmp_path, 0o700)
 
-def test_decompress_file_bz2_permission_error_on_input_file(tmp_path) -> None:
+def test_decompress_file_bz2_no_permission_on_input_file(tmp_path) -> None:
     """
-    Test the decompress_file_bz2 function with permission error on input file.
+    Test the decompress_file_bz2 function with no permission on input file.
     """
-    # Test case 8: Permission error on input file
+    # Test case 8: No permission on input file
     compressed_file = tmp_path / "input.txt.bz2"
     output_file = tmp_path / "output.txt"
     data = b"hello world"
@@ -146,11 +146,11 @@ def test_decompress_file_bz2_permission_error_on_input_file(tmp_path) -> None:
     with bz2.open(compressed_file, 'wb') as f:
         f.write(data)
     
-    # Simulate a permission error by making the input file read-only
-    os.chmod(compressed_file, 0o400)
+    # Remove all permissions from the input file
+    os.chmod(compressed_file, 0o000)
     
     try:
-        with pytest.raises(IOError):
+        with pytest.raises(PermissionError):
             decompress_file_bz2(str(compressed_file), str(output_file))
     finally:
         # Restore permissions to delete the temporary file
