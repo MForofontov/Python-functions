@@ -30,6 +30,9 @@ def replace_by_regex(string: str, pattern: str, replacement: str) -> str:
         raise TypeError("pattern must be a string")
     if not isinstance(replacement, str):
         raise TypeError("replacement must be a string")
+    # If the pattern is empty, return the original string
+    if pattern == "":
+        return string
 
     # Adjust the pattern to also match surrounding spaces
     adjusted_pattern = r'\s*' + pattern + r'\s*'

@@ -25,6 +25,9 @@ def remove_by_regex(string: str, pattern: str) -> str:
         raise TypeError("string must be a string")
     if not isinstance(pattern, str):
         raise TypeError("pattern must be a string")
+    # If the pattern is empty, return the original string
+    if pattern == "":
+        return string
 
     # Adjust the pattern to also match surrounding spaces
     adjusted_pattern = r'\s*' + pattern + r'\s*'

@@ -141,17 +141,17 @@ def test_compress_tar_io_error_on_output_file(tmp_path) -> None:
     os.chmod(tmp_path, 0o400)
     
     try:
-        with pytest.raises(IOError):
+        with pytest.raises(OSError):
             compress_tar(str(input_file), str(output_tar))
     finally:
         # Restore permissions to delete the temporary directory
-        os.chmod(tmp_path, 0o700)
+        os.chmod(tmp_path, 0o600)
 
-def test_compress_tar_permission_error_on_input_path(tmp_path) -> None:
+def test_compress_tar_no_permission_on_input_file(tmp_path) -> None:
     """
-    Test the compress_tar function with permission error on input path.
+    Test the compress_tar function with no permission on input file.
     """
-    # Test case 8: Permission error on input path
+    # Test case 8: No permission on input file
     input_file = tmp_path / "input.txt"
     output_tar = tmp_path / "output.tar.gz"
     data = b"hello world"
@@ -159,11 +159,11 @@ def test_compress_tar_permission_error_on_input_path(tmp_path) -> None:
     with open(input_file, 'wb') as f:
         f.write(data)
     
-    # Simulate a permission error by making the input file read-only
-    os.chmod(input_file, 0o400)
+    # Remove all permissions from the input file
+    os.chmod(input_file, 0o000)
     
     try:
-        with pytest.raises(IOError):
+        with pytest.raises(OSError):
             compress_tar(str(input_file), str(output_tar))
     finally:
         # Restore permissions to delete the temporary file
@@ -188,7 +188,7 @@ def test_compress_tar_io_error_on_read_only_output_file(tmp_path) -> None:
     os.chmod(output_tar, 0o400)
     
     try:
-        with pytest.raises(IOError):
+        with pytest.raises(OSError):
             compress_tar(str(input_file), str(output_tar))
     finally:
         # Restore permissions to delete the temporary file

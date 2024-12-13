@@ -6,9 +6,9 @@ def is_anagram(string_1: str, string_2: str) -> bool:
 
     Parameters
     ----------
-    str1 : str
+    string_1 : str
         The first string.
-    str2 : str
+    string_2 : str
         The second string.
 
     Returns
@@ -21,12 +21,12 @@ def is_anagram(string_1: str, string_2: str) -> bool:
     TypeError
         If either of the inputs is not a string.
     """
-    if not isinstance(str1, str) or not isinstance(str2, str):
+    if not isinstance(string_1, str) or not isinstance(str2, str):
         raise TypeError("Both inputs must be strings")
 
     # Remove any whitespace and convert to lowercase
-    str1 = str1.replace(" ", "").lower()
-    str2 = str2.replace(" ", "").lower()
+    string_1 = string_1.replace(" ", "").lower()
+    string_2 = string_2.replace(" ", "").lower()
 
     # Use Counter to compare the frequency of characters in both strings
-    return Counter(str1) == Counter(str2)
+    return Counter(string_1) == Counter(string_2)
