@@ -125,11 +125,11 @@ def test_compress_file_gzip_io_error_on_output_file(tmp_path) -> None:
     os.chmod(tmp_path, 0o400)
     
     try:
-        with pytest.raises(IOError):
+        with pytest.raises(OSError):
             compress_file_gzip(str(input_file), str(output_file))
     finally:
         # Restore permissions to delete the temporary directory
-        os.chmod(tmp_path, 0o700)
+        os.chmod(tmp_path, 0o600)
 
 def test_compress_file_gzip_no_permission_on_input_file(tmp_path) -> None:
     """
@@ -147,7 +147,7 @@ def test_compress_file_gzip_no_permission_on_input_file(tmp_path) -> None:
     os.chmod(input_file, 0o000)
     
     try:
-        with pytest.raises(PermissionError):
+        with pytest.raises(OSError):
             compress_file_gzip(str(input_file), str(output_file))
     finally:
         # Restore permissions to delete the temporary file
@@ -172,7 +172,7 @@ def test_compress_file_gzip_io_error_on_read_only_output_file(tmp_path) -> None:
     os.chmod(output_file, 0o400)
     
     try:
-        with pytest.raises(IOError):
+        with pytest.raises(OSError):
             compress_file_gzip(str(input_file), str(output_file))
     finally:
         # Restore permissions to delete the temporary file

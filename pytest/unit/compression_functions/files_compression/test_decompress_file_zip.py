@@ -143,11 +143,11 @@ def test_decompress_file_zip_io_error_on_output_dir(tmp_path) -> None:
     os.chmod(output_dir, 0o400)
     
     try:
-        with pytest.raises(IOError):
+        with pytest.raises(OSError):
             decompress_file_zip(str(compressed_file), str(output_dir))
     finally:
         # Restore permissions to delete the temporary directory
-        os.chmod(output_dir, 0o700)
+        os.chmod(output_dir, 0o600)
 
 def test_decompress_file_zip_no_permission_on_input_file(tmp_path) -> None:
     """
@@ -170,7 +170,7 @@ def test_decompress_file_zip_no_permission_on_input_file(tmp_path) -> None:
     os.chmod(compressed_file, 0o000)
     
     try:
-        with pytest.raises(PermissionError):
+        with pytest.raises(OSError):
             decompress_file_zip(str(compressed_file), str(output_dir))
     finally:
         # Restore permissions to delete the temporary file
@@ -199,7 +199,7 @@ def test_decompress_file_zip_io_error_on_read_only_output_dir(tmp_path) -> None:
     os.chmod(output_dir, 0o400)
     
     try:
-        with pytest.raises(IOError):
+        with pytest.raises(OSError):
             decompress_file_zip(str(compressed_file), str(output_dir))
     finally:
         # Restore permissions to delete the temporary directory

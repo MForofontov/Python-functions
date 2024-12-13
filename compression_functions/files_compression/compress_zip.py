@@ -45,6 +45,6 @@ def compress_zip(input_path: str, output_zip: str) -> None:
             else:
                 # If the input path is a file, add the file to the zip archive
                 zipf.write(input_path, arcname=os.path.basename(input_path))
-    except IOError as e:
+    except OSError as e:
         # Raise an IOError if an I/O error occurs during compression
-        raise IOError(f"An I/O error occurred during compression: {e}")
+        raise OSError(f"An I/O error occurred during compression: {e}")
