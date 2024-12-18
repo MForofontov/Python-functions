@@ -1,6 +1,8 @@
-from typing import Callable, Any
+from typing import Callable, Any, TypeVar, Optional
 
-def conditional_execute(predicate: Callable[[], bool]) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+T = TypeVar('T')
+
+def conditional_execute(predicate: Callable[[], bool]) -> Callable[[Callable[..., T]], Callable[..., Optional[T]]]:
     """
     Decorator to conditionally execute a function based on a predicate.
 
@@ -11,24 +13,24 @@ def conditional_execute(predicate: Callable[[], bool]) -> Callable[[Callable[...
 
     Returns
     -------
-    Callable[[Callable[..., Any]], Callable[..., Any]]
+    Callable[[Callable[..., T]], Callable[..., Optional[T]]]
         A decorator that wraps the input function with conditional execution logic.
     """
-    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+    def decorator(func: Callable[..., T]) -> Callable[..., Optional[T]]:
         """
         Decorator function.
 
         Parameters
         ----------
-        func : Callable[..., Any]
+        func : Callable[..., T]
             The function to be conditionally executed.
 
         Returns
         -------
-        Callable[..., Any]
+        Callable[..., Optional[T]]
             The wrapped function with conditional execution logic.
         """
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: Any, **kwargs: Any) -> Optional[T]:
             """
             Wrapper function to conditionally execute the input function.
 
@@ -41,12 +43,13 @@ def conditional_execute(predicate: Callable[[], bool]) -> Callable[[Callable[...
 
             Returns
             -------
-            Any
+            Optional[T]
                 The result of the wrapped function if the predicate returns True, otherwise None.
             """
             if predicate():
                 return func(*args, **kwargs)
-            else:
-                print(f"{func.__name__} was not executed due to predicate failure.")
+            return None
+        
         return wrapper
+    
     return decorator
