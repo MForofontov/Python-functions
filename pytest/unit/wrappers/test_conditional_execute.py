@@ -5,22 +5,12 @@ from decorators.conditional_execute import conditional_execute
 def always_true() -> bool:
     """
     Predicate function that always returns True.
-    
-    Returns
-    -------
-    bool
-        Always returns True.
     """
     return True
 
 def always_false() -> bool:
     """
     Predicate function that always returns False.
-    
-    Returns
-    -------
-    bool
-        Always returns False.
     """
     return False
 
