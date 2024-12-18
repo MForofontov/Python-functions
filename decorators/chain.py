@@ -1,20 +1,22 @@
-from typing import Callable, Any
+from typing import Callable, Any, TypeVar, Union
 
-def chain(func: Callable[..., Any]) -> Callable[..., Any]:
+T = TypeVar('T')
+
+def chain(func: Callable[..., T]) -> Callable[..., Union[T, Any]]:
     """
     Decorator to call the 'chain' method on the result of a function if it exists.
 
     Parameters
     ----------
-    func : Callable[..., Any]
+    func : Callable[..., T]
         The function to be wrapped.
 
     Returns
     -------
-    Callable[..., Any]
+    Callable[..., Union[T, Any]]
         A wrapper function that calls the 'chain' method on the result of the input function if it exists.
     """
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def wrapper(*args: Any, **kwargs: Any) -> Union[T, Any]:
         """
         Wrapper function to call the 'chain' method on the result of the input function if it exists.
 
@@ -27,11 +29,11 @@ def chain(func: Callable[..., Any]) -> Callable[..., Any]:
 
         Returns
         -------
-        Any
+        Union[T, Any]
             The result of the wrapped function, or the result of calling its 'chain' method if it exists.
         """
         result = func(*args, **kwargs)
-        if hasattr(result, 'chain'):
+        if hasattr(result, 'chain') and callable(getattr(result, 'chain')):
             return result.chain()
         return result
     

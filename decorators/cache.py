@@ -1,4 +1,4 @@
-from typing import Callable, Any, Dict
+from typing import Callable, Any, Dict, Tuple, FrozenSet
 
 def cache(func: Callable[..., Any]) -> Callable[..., Any]:
     """
@@ -14,7 +14,7 @@ def cache(func: Callable[..., Any]) -> Callable[..., Any]:
     Callable[..., Any]
         A wrapper function that caches the results of the input function.
     """
-    cached_results: Dict = {}
+    cached_results: Dict[Tuple[Tuple[Any, ...], FrozenSet[Tuple[str, Any]]], Any] = {}
 
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         """
@@ -32,9 +32,15 @@ def cache(func: Callable[..., Any]) -> Callable[..., Any]:
         Any
             The cached result of the wrapped function.
         """
-        key = (args, frozenset(kwargs.items()))
+        # Create a key based on the function arguments
+        key: Tuple[Tuple[Any, ...], FrozenSet[Tuple[str, Any]]] = (args, frozenset(kwargs.items()))
+        
+        # Check if the result is already cached
         if key not in cached_results:
+            # If not cached, call the function and store the result
             cached_results[key] = func(*args, **kwargs)
+        
+        # Return the cached result
         return cached_results[key]
     
     return wrapper
