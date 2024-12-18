@@ -1,69 +1,62 @@
 import pytest
 import asyncio
-import os
-from decorators.async_handle_error import async_handle_error
+import logging
+from decorators.async_wrapper import async_wrapper
 
-@async_handle_error("An error occurred in example_coroutine")
-async def example_coroutine():
-    await asyncio.sleep(1)
+def sync_function(x, y):
+    return x + y
+
+def sync_function_with_error(x, y):
     raise ValueError("This is an example error")
 
-@async_handle_error("An error occurred in example_coroutine_no_error")
-async def example_coroutine_no_error():
-    await asyncio.sleep(1)
-    return "Success"
+@async_wrapper
+def wrapped_sync_function(x, y):
+    return sync_function(x, y)
 
-@async_handle_error("An error occurred in example_coroutine_with_logging", log_file="error.log")
-async def example_coroutine_with_logging():
-    await asyncio.sleep(1)
-    raise ValueError("This is an example error with logging")
+@async_wrapper
+def wrapped_sync_function_with_error(x, y):
+    return sync_function_with_error(x, y)
+
+@async_wrapper(log_errors=True)
+def wrapped_sync_function_with_logging(x, y):
+    return sync_function_with_error(x, y)
+
+async def async_function(x, y):
+    return x + y
+
+def test_async_wrapper_invalid_function(caplog):
+    """
+    Test the async_wrapper decorator with an asynchronous function.
+    """
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(TypeError, match="The function to be wrapped must be synchronous"):
+            @async_wrapper(log_errors=True)
+            async def invalid_function(x, y):
+                return await async_function(x, y)
+        assert "An error occurred in invalid_function: The function to be wrapped must be synchronous" in caplog.text
 
 @pytest.mark.asyncio
-async def test_async_handle_error_with_error(capfd):
+async def test_async_wrapper_success():
     """
-    Test the async_handle_error decorator with a function that raises an error.
+    Test the async_wrapper decorator with a synchronous function that succeeds.
     """
-    result = await example_coroutine()
-    assert result is None
-
-    # Capture the printed output
-    captured = capfd.readouterr()
-    assert "An error occurred in example_coroutine: This is an example error" in captured.out
+    result = await wrapped_sync_function(1, 2)
+    assert result == 3
 
 @pytest.mark.asyncio
-async def test_async_handle_error_no_error():
+async def test_async_wrapper_error():
     """
-    Test the async_handle_error decorator with a function that does not raise an error.
+    Test the async_wrapper decorator with a synchronous function that raises an error.
     """
-    result = await example_coroutine_no_error()
-    assert result == "Success"
+    with pytest.raises(ValueError, match="This is an example error"):
+        await wrapped_sync_function_with_error(1, 2)
 
 @pytest.mark.asyncio
-async def test_async_handle_error_with_logging(capfd):
+async def test_async_wrapper_with_logging(caplog):
     """
-    Test the async_handle_error decorator with logging enabled.
+    Test the async_wrapper decorator with logging enabled.
     """
-    result = await example_coroutine_with_logging()
-    assert result is None
-
-    # Capture the printed output
-    captured = capfd.readouterr()
-    assert "An error occurred in example_coroutine_with_logging: This is an example error with logging" in captured.out
-
-    # Check if the log file contains the error message
-    with open("error.log", "r") as log_file:
-        log_content = log_file.read()
-        assert "An error occurred in example_coroutine_with_logging" in log_content
-        assert "This is an example error with logging" in log_content
-
-    # Clean up: delete the log file
-    os.remove("error.log")
-
-def test_async_handle_error_invalid_function():
-    """
-    Test the async_handle_error decorator with a non-async function.
-    """
-    with pytest.raises(TypeError):
-        @async_handle_error("An error occurred in invalid_function")
-        def invalid_function():
-            pass
+    with caplog.at_level(logging.ERROR):
+        with pytest.raises(ValueError, match="This is an example error"):
+            await wrapped_sync_function_with_logging(1, 2)
+        assert "An error occurred in wrapped_sync_function_with_logging: This is an example error" in caplog.text
