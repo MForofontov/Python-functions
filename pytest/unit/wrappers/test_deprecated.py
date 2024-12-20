@@ -51,6 +51,7 @@ def test_old_function(capsys, caplog):
     """
     Test the deprecated decorator with the old_function.
     """
+    # Test case 1: Verify the old_function is deprecated
     with caplog.at_level(logging.WARNING):
         result = old_function(1, 2)
         assert result == 3
@@ -60,6 +61,7 @@ def test_another_old_function(capsys):
     """
     Test the deprecated decorator with the another_old_function.
     """
+    # Test case 2: Verify the another_old_function is deprecated
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         result = another_old_function("world")
