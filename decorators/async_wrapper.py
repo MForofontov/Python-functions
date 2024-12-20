@@ -1,9 +1,9 @@
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 import asyncio
 import logging
 import inspect
 
-def async_wrapper(func: Callable[..., Any], log_errors: bool = False) -> Callable[..., Any]:
+def async_wrapper(func: Callable[..., Any], logger: Optional[logging.Logger] = None) -> Callable[..., Any]:
     """
     Wraps a synchronous function to be executed asynchronously.
 
@@ -11,8 +11,8 @@ def async_wrapper(func: Callable[..., Any], log_errors: bool = False) -> Callabl
     ----------
     func : Callable[..., Any]
         The synchronous function to be wrapped.
-    log_errors : bool, optional
-        Whether to log errors using the logging module. Default is False.
+    logger : Optional[logging.Logger]
+        The logger to use for logging errors. If None, the default logger will be used.
 
     Returns
     -------
@@ -26,9 +26,10 @@ def async_wrapper(func: Callable[..., Any], log_errors: bool = False) -> Callabl
     """
     if inspect.iscoroutinefunction(func):
         error_message = "The function to be wrapped must be synchronous"
-        if log_errors:
-            logging.error(f"An error occurred in {func.__name__}: {error_message}")
-        raise TypeError(error_message)
+        if logger:
+            logger.error(f"An error occurred in {func.__name__}: {error_message}", exc_info=True)
+        else:
+            raise TypeError(error_message)
 
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         """
@@ -52,8 +53,9 @@ def async_wrapper(func: Callable[..., Any], log_errors: bool = False) -> Callabl
             # Run the synchronous function in an executor and return the result
             return await loop.run_in_executor(None, func, *args, **kwargs)
         except Exception as e:
-            if log_errors:
-                logging.error(f"An error occurred in {func.__name__}: {e}", exc_info=True)
-            raise
+            if logger:
+                logger.error(f"An error occurred in {func.__name__}: {e}", exc_info=True)
+            else:
+                raise
 
     return wrapper

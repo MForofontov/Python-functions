@@ -5,12 +5,22 @@ from decorators.conditional_execute import conditional_execute
 def always_true() -> bool:
     """
     Predicate function that always returns True.
+    
+    Returns
+    -------
+    bool
+        Always returns True.
     """
     return True
 
 def always_false() -> bool:
     """
     Predicate function that always returns False.
+    
+    Returns
+    -------
+    bool
+        Always returns False.
     """
     return False
 
@@ -71,3 +81,13 @@ def test_conditional_execute_with_false_predicate_and_kwargs():
     # Test case 4: Keyword arguments with false predicate
     assert greet_false("Hello") is None
     assert greet_false("Hello", name="Alice") is None
+
+def test_conditional_execute_invalid_predicate():
+    """
+    Test the conditional_execute decorator with an invalid predicate.
+    """
+    # Test case 5: Invalid predicate
+    with pytest.raises(TypeError, match="Predicate must be callable"):
+        @conditional_execute("not a callable")
+        def invalid_func(x: int) -> int:
+            return x

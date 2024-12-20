@@ -1,9 +1,9 @@
-from typing import Callable, Any
+from typing import Callable, Any, Optional
 import asyncio
 import inspect
 import logging
 
-def async_handle_error(error_message: str, log_errors: bool = False) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def async_handle_error(error_message: str, logger: Optional[logging.Logger] = None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     Decorator to handle errors in asynchronous functions.
 
@@ -11,8 +11,8 @@ def async_handle_error(error_message: str, log_errors: bool = False) -> Callable
     ----------
     error_message : str
         The error message to print when an exception occurs.
-    log_errors : bool, optional
-        Whether to log errors using the logging module. Default is False.
+    logger : Optional[logging.Logger]
+        The logger to use for logging errors. If None, the default logger will be used.
 
     Returns
     -------
@@ -40,9 +40,10 @@ def async_handle_error(error_message: str, log_errors: bool = False) -> Callable
         """
         if not inspect.iscoroutinefunction(func):
             error_message = "The function to be wrapped must be asynchronous"
-            if log_errors:
-                logging.error(error_message)
-            raise TypeError("The function to be decorated must be asynchronous")
+            if logger:
+                logger.error(f"An error occurred in {func.__name__}: {error_message}", exc_info=True)
+            else:
+                raise TypeError(error_message)
 
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             """
@@ -67,8 +68,8 @@ def async_handle_error(error_message: str, log_errors: bool = False) -> Callable
                 # Print the custom error message and the exception
                 print(f"{error_message}: {e}")
                 # Log the error message and the exception if logging is enabled
-                if log_errors:
-                    logging.error(f"{error_message}: {e}")
+                if logger:
+                    logger.error(f"An error occurred in {func.__name__}: {e}", exc_info=True)
                 # Return None if an exception occurs
                 return None
         return wrapper
