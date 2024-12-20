@@ -29,12 +29,14 @@ def test_add_correct_types():
     """
     Test the add function with correct types.
     """
+    # Test case 1: Add function successfully
     assert add(1, 2) == 3
 
 def test_add_incorrect_types_logger(caplog):
     """
     Test the add function with incorrect types that writes to logger.
     """
+    # Test case 2: Add function with incorrect types
     with caplog.at_level(logging.ERROR):
         add("1", 2)
         assert "Expected <class 'int'> for argument 'x', got <class 'str'>." in caplog.text
@@ -43,12 +45,14 @@ def test_greet_correct_type():
     """
     Test the greet function with correct type.
     """
+    # Test case 3: Greet function successfully
     assert greet("world") == "Hello, world!"
 
 def test_greet_incorrect_type_raise_error():
     """
     Test the greet function with incorrect type that raises error.
     """
+    # Test case 4: Greet function with incorrect type
     with pytest.raises(TypeError, match="Expected <class 'str'> for argument 'name', got <class 'int'>."):
         greet(123)
 
