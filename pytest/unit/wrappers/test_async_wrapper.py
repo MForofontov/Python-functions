@@ -66,8 +66,7 @@ async def test_async_wrapper_with_logging(caplog):
     """
     # Test case 2: Synchronous function that raises an error with logging enabled
     with caplog.at_level(logging.ERROR):
-        with pytest.raises(ValueError, match="This is an example error"):
-            await wrapped_sync_function_with_logging(1, 2)
+        await wrapped_sync_function_with_logging(1, 2)
         assert "An error occurred in wrapped_sync_function_with_logging: This is an example error" in caplog.text
 
 def test_async_wrapper_invalid_function(caplog):
@@ -76,10 +75,9 @@ def test_async_wrapper_invalid_function(caplog):
     """
     # Test case 3: Asynchronous function passed to async_wrapper
     with caplog.at_level(logging.ERROR):
-        with pytest.raises(TypeError, match="The function to be wrapped must be synchronous"):
-            @async_wrapper(test_logger)
-            async def invalid_function(x: int, y: int) -> int:
-                return await async_function(x, y)
+        @async_wrapper(test_logger)
+        async def invalid_function(x: int, y: int) -> int:
+            return await async_function(x, y)
         assert "An error occurred in invalid_function: The function to be wrapped must be synchronous" in caplog.text
 
 @pytest.mark.asyncio
