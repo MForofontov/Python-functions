@@ -109,9 +109,9 @@ async def test_async_function_exception():
 
 def test_non_async_function_with_logger(caplog):
     """
-    Test case 8: Synchronous function that raises an error with logging enabled
+    Test case 8: Synchronous function that logs an error with logging enabled
     """
-    # Test case 8: Synchronous function that raises an error with logging enabled
+    # Test case 8: Synchronous function that logs an error with logging enabled
     with caplog.at_level(logging.ERROR):
         @async_handle_error("An error occurred", logger=test_logger)
         def sample_function(x: int, y: int) -> int:
@@ -121,9 +121,9 @@ def test_non_async_function_with_logger(caplog):
 @pytest.mark.asyncio
 async def test_async_function_with_logger(caplog):
     """
-    Test case 9: Asynchronous function that raises an exception with logging enabled
+    Test case 9: Asynchronous function that logs an exception with logging enabled
     """
-    # Test case 9: Asynchronous function that raises an exception with logging enabled
+    # Test case 9: Asynchronous function that logs an exception with logging enabled
     with caplog.at_level(logging.ERROR):
         result = await sample_function_with_logger(1, 2)
         assert result is None
