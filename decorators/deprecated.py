@@ -48,7 +48,7 @@ def deprecated(logger: Optional[logging.Logger] = None) -> Callable[[Callable[..
             """
             # Log the deprecation warning
             if logger is not None:
-                logger.warning(f"Call to deprecated function {func.__name__}.")
+                logger.warning(f"Call to deprecated function {func.__name__}.", exc_info=True)
             # Emit a deprecation warning
             else:
                 warnings.warn(f"{func.__name__} is deprecated.", DeprecationWarning, stacklevel=2)

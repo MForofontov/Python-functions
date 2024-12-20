@@ -41,7 +41,7 @@ def async_handle_error(error_message: str, logger: Optional[logging.Logger] = No
         if not inspect.iscoroutinefunction(func):
             error_message = "The function to be wrapped must be asynchronous"
             if logger:
-                logger.error(f"An error occurred in {func.__name__}: {error_message}")
+                logger.error(f"An error occurred in {func.__name__}: {error_message}", exc_info=True)
             raise TypeError("The function to be decorated must be asynchronous")
 
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
