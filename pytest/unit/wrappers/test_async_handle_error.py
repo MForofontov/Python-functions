@@ -85,8 +85,8 @@ async def test_sync_function_with_no_args():
     result = await sample_function_no_args()
     assert result == "success"
 
-@pytest.mark.asyncio
-async def test_non_async_function():
+
+def test_non_async_function():
     """
     Test case 6: Synchronous function that raises an error
     """
@@ -105,8 +105,8 @@ async def test_async_function_exception():
     with pytest.raises(ValueError, match="Test exception"):
         result = await sample_function_exception(1, 2)
 
-@pytest.mark.asyncio
-async def test_non_async_function_with_logger(caplog):
+
+def test_non_async_function_with_logger(caplog):
     """
     Test case 8: Synchronous function that raises an error with logging enabled
     """
