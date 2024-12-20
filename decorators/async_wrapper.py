@@ -29,7 +29,7 @@ def async_wrapper(func: Callable[..., Any], logger: Optional[logging.Logger] = N
         if logger:
             logger.error(f"An error occurred in {func.__name__}: {error_message}", exc_info=True)
         else:
-            raise
+            raise TypeError(error_message)
 
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         """
