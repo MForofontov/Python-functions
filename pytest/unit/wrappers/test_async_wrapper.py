@@ -3,6 +3,14 @@ import asyncio
 import logging
 from decorators.async_wrapper import async_wrapper
 
+# Configure test_logger
+test_logger = logging.getLogger('test_logger')
+test_logger.setLevel(logging.ERROR)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+test_logger.addHandler(handler)
+
 def sync_function(x: int, y: int) -> int:
     """
     Synchronous function that adds two numbers.
@@ -35,7 +43,7 @@ def wrapped_sync_function_with_error(x: int, y: int) -> None:
     """
     return sync_function_with_error(x, y)
 
-@async_wrapper(log_errors=True)
+@async_wrapper(test_logger)
 def wrapped_sync_function_with_logging(x: int, y: int) -> None:
     """
     Wrapped synchronous function that raises a ValueError with logging enabled.
@@ -69,7 +77,7 @@ def test_async_wrapper_invalid_function(caplog):
     # Test case 3: Asynchronous function passed to async_wrapper
     with caplog.at_level(logging.ERROR):
         with pytest.raises(TypeError, match="The function to be wrapped must be synchronous"):
-            @async_wrapper(log_errors=True)
+            @async_wrapper(test_logger)
             async def invalid_function(x: int, y: int) -> int:
                 return await async_function(x, y)
         assert "An error occurred in invalid_function: The function to be wrapped must be synchronous" in caplog.text
