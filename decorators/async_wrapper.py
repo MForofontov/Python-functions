@@ -11,8 +11,8 @@ def async_wrapper(func: Callable[..., Any], logger: Optional[logging.Logger] = N
     ----------
     func : Callable[..., Any]
         The synchronous function to be wrapped.
-    log_errors : bool, optional
-        Whether to log errors using the logging module. Default is False.
+    logger : Optional[logging.Logger]
+        The logger to use for logging errors. If None, the default logger will be used.
 
     Returns
     -------
