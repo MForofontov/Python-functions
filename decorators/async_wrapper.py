@@ -28,7 +28,8 @@ def async_wrapper(func: Callable[..., Any], logger: Optional[logging.Logger] = N
         error_message = "The function to be wrapped must be synchronous"
         if logger:
             logger.error(f"An error occurred in {func.__name__}: {error_message}", exc_info=True)
-        raise TypeError(error_message)
+        else:
+            raise
 
     async def wrapper(*args: Any, **kwargs: Any) -> Any:
         """
@@ -54,6 +55,7 @@ def async_wrapper(func: Callable[..., Any], logger: Optional[logging.Logger] = N
         except Exception as e:
             if logger:
                 logger.error(f"An error occurred in {func.__name__}: {e}", exc_info=True)
-            raise
+            else:
+                raise
 
     return wrapper
