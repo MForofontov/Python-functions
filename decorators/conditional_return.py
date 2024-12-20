@@ -17,7 +17,15 @@ def conditional_return(condition: Callable[..., bool], return_value: T) -> Calla
     -------
     Callable[[Callable[..., T]], Callable[..., T]]
         A decorator that wraps the input function with conditional return logic.
+    
+    Raises
+    ------
+    TypeError
+        If the condition is not callable.
     """
+    if not callable(condition):
+        raise TypeError("Condition must be callable")
+
     def decorator(func: Callable[..., T]) -> Callable[..., T]:
         """
         Decorator function.

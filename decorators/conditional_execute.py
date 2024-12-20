@@ -15,6 +15,11 @@ def conditional_execute(predicate: Callable[[], bool]) -> Callable[[Callable[...
     -------
     Callable[[Callable[..., T]], Callable[..., Optional[T]]]
         A decorator that wraps the input function with conditional execution logic.
+    
+    Raises
+    ------
+    TypeError
+        If the predicate is not callable.
     """
     if not callable(predicate):
         raise TypeError("Predicate must be callable")
