@@ -1,7 +1,7 @@
 import pytest
 import warnings
 import logging
-from deprecated import deprecated
+from decorators.deprecated import deprecated
 
 # Configure a custom logger for testing
 test_logger = logging.getLogger('test_logger')
@@ -51,13 +51,11 @@ def test_old_function(capsys, caplog):
     """
     Test the deprecated decorator with the old_function.
     """
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("always")
-        with caplog.at_level(logging.WARNING):
-            result = old_function(1, 2)
-            assert result == 3
-            assert len(w) == 0
-            assert "Call to deprecated function old_function." in caplog.text
+    with caplog.at_level(logging.WARNING):
+        result = old_function(1, 2)
+        assert result == 3
+        assert len(w) == 0
+        assert "Call to deprecated function old_function." in caplog.text
 
 def test_another_old_function(capsys):
     """
