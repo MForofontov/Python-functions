@@ -90,7 +90,7 @@ def test_non_async_function():
     """
     Test case 6: Synchronous function that raises an error
     """
-    # Test case 6: Synchronous function that raises an error
+    # Test case 6: Synchronous function that raises an TypeError
     with pytest.raises(TypeError, match="The function to be wrapped must be asynchronous"):
         @async_handle_error("An error occurred")
         def sample_function(x: int, y: int) -> int:
@@ -101,9 +101,10 @@ async def test_async_function_exception():
     """
     Test case 7: Asynchronous function that raises an exception
     """
-    # Test case 7: Asynchronous function that raises an exception
+    # Test case 7: Asynchronous function that raises an ValueError
     with pytest.raises(ValueError, match="Test exception"):
         result = await sample_function_exception(1, 2)
+    assert result is None
 
 
 def test_non_async_function_with_logger(caplog):
@@ -118,21 +119,11 @@ def test_non_async_function_with_logger(caplog):
         assert "An error occurred in sample_function: The function to be wrapped must be asynchronous" in caplog.text
 
 @pytest.mark.asyncio
-async def test_async_function_with_logger_raises_error(caplog):
-    """
-    Test case 9: Asynchronous function that raises an error with logging enabled
-    """
-    # Test case 9: Asynchronous function that raises an error with logging enabled
-    with caplog.at_level(logging.ERROR):
-        result = await sample_function_with_logger(1, 2)
-    assert "An error occurred in sample_function_with_logger: Test exception" in caplog.text
-
-@pytest.mark.asyncio
 async def test_async_function_with_logger(caplog):
     """
-    Test case 10: Asynchronous function that raises an exception with logging enabled
+    Test case 9: Asynchronous function that raises an exception with logging enabled
     """
-    # Test case 10: Asynchronous function that raises an exception with logging enabled
+    # Test case 9: Asynchronous function that raises an exception with logging enabled
     with caplog.at_level(logging.ERROR):
         result = await sample_function_with_logger(1, 2)
         assert result is None

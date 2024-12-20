@@ -60,16 +60,25 @@ async def test_sync_function_exception(capfd):
     captured = capfd.readouterr()
     assert "Test exception" in captured.out
 
-@pytest.mark.asyncio
-async def test_async_function():
+
+def test_async_function():
     """
     Test case 3: Asynchronous function that raises an error
     """
-    # Test case 3: Asynchronous function that raises an error
+    # Test case 3: Asynchronous function that raises an TypeError
     with pytest.raises(TypeError, match="The function to be wrapped must be synchronous"):
         @async_wrapper
         async def sample_function(x: int, y: int) -> int:
             return x + y
+
+@pytest.mark.asyncio
+async def test_sync_function_with_logger_raises_value_error():
+    """
+    Test case 4: Synchronous function that raises a ValueError with logging enabled
+    """
+    # Test case 4: Synchronous function that raises a ValueError
+    with pytest.raises(ValueError, match="Test exception"):
+        result = await sample_function_with_logger(1, 2)
 
 @pytest.mark.asyncio
 async def test_sync_function_with_logger(caplog):
