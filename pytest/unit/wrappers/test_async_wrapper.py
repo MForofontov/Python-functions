@@ -79,6 +79,18 @@ async def test_sync_function_with_logger_raises_value_error():
     # Test case 4: Synchronous function that raises a ValueError
     with pytest.raises(ValueError, match="Test exception"):
         result = await sample_function_with_logger(1, 2)
+    assert result is None
+
+def test_async_function_with_logger(caplog):
+    """
+    Test case 3: Asynchronous function that raises an error with logging enabled
+    """
+    # Test case 3: Asynchronous function that raises an error with logging enabled
+    with caplog.at_level(logging.ERROR):
+        @async_wrapper(logger=test_logger)
+        async def sample_function(x: int, y: int) -> int:
+            return x + y
+        assert "An error occurred in sample_function: The function to be wrapped must be synchronous" in caplog.text
 
 @pytest.mark.asyncio
 async def test_sync_function_with_logger(caplog):
