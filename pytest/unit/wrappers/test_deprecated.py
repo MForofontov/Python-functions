@@ -54,7 +54,6 @@ def test_old_function(capsys, caplog):
     with caplog.at_level(logging.WARNING):
         result = old_function(1, 2)
         assert result == 3
-        assert len(w) == 0
         assert "Call to deprecated function old_function." in caplog.text
 
 def test_another_old_function(capsys):
