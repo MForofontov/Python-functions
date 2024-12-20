@@ -11,80 +11,118 @@ formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(messag
 handler.setFormatter(formatter)
 test_logger.addHandler(handler)
 
-def sync_function(x: int, y: int) -> int:
-    """
-    Synchronous function that adds two numbers.
-    """
-    return x + y
-
-def sync_function_with_error(x: int, y: int) -> None:
-    """
-    Synchronous function that raises a ValueError.
-    """
-    raise ValueError("This is an example error")
-
-async def async_function(x: int, y: int) -> int:
-    """
-    Asynchronous function that adds two numbers.
-    """
+# Define sample functions for use in tests
+@async_wrapper
+def sample_function_success(x: int, y: int) -> int:
     return x + y
 
 @async_wrapper
-def wrapped_sync_function(x: int, y: int) -> int:
-    """
-    Wrapped synchronous function that adds two numbers.
-    """
-    return sync_function(x, y)
+def sample_function_exception(x: int, y: int) -> int:
+    raise ValueError("Test exception")
+
+@async_wrapper(logger=test_logger)
+def sample_function_with_logger(x: int, y: int) -> int:
+    raise ValueError("Test exception")
 
 @async_wrapper
-def wrapped_sync_function_with_error(x: int, y: int) -> None:
-    """
-    Wrapped synchronous function that raises a ValueError.
-    """
-    return sync_function_with_error(x, y)
+def sample_function_with_args(x: int, y: int, z: int) -> int:
+    return x + y + z
 
-@async_wrapper(test_logger)
-def wrapped_sync_function_with_logging(x: int, y: int) -> None:
-    """
-    Wrapped synchronous function that raises a ValueError with logging enabled.
-    """
-    return sync_function_with_error(x, y)
+@async_wrapper
+def sample_function_with_kwargs(x: int, y: int, z: int = 0) -> int:
+    return x + y + z
+
+@async_wrapper
+def sample_function_with_mixed_args_kwargs(x: int, y: int, *args: int, z: int = 0, **kwargs: int) -> int:
+    return x + y + z + sum(args) + sum(kwargs.values())
+
+@async_wrapper
+def sample_function_no_args() -> str:
+    return "success"
 
 @pytest.mark.asyncio
-async def test_async_wrapper_success():
+async def test_sync_function_success():
     """
-    Test the async_wrapper decorator with a synchronous function that succeeds.
+    Test case 1: Synchronous function that succeeds
     """
     # Test case 1: Synchronous function that succeeds
-    result = await wrapped_sync_function(1, 2)
+    result = await sample_function_success(1, 2)
     assert result == 3
 
 @pytest.mark.asyncio
-async def test_async_wrapper_with_logging(caplog):
+async def test_sync_function_with_args():
     """
-    Test the async_wrapper decorator with logging enabled.
+    Test case 2: Synchronous function with positional arguments
     """
-    # Test case 2: Synchronous function that raises an error with logging enabled
-    with caplog.at_level(logging.ERROR):
-        await wrapped_sync_function_with_logging(1, 2)
-        assert "An error occurred in wrapped_sync_function_with_logging: This is an example error" in caplog.text
-
-def test_async_wrapper_invalid_function(caplog):
-    """
-    Test the async_wrapper decorator with an asynchronous function.
-    """
-    # Test case 3: Asynchronous function passed to async_wrapper
-    with caplog.at_level(logging.ERROR):
-        @async_wrapper(test_logger)
-        async def invalid_function(x: int, y: int) -> int:
-            return await async_function(x, y)
-        assert "An error occurred in invalid_function: The function to be wrapped must be synchronous" in caplog.text
+    # Test case 2: Synchronous function with positional arguments
+    result = await sample_function_with_args(1, 2, 3)
+    assert result == 6
 
 @pytest.mark.asyncio
-async def test_async_wrapper_error():
+async def test_sync_function_with_kwargs():
     """
-    Test the async_wrapper decorator with a synchronous function that raises an error.
+    Test case 3: Synchronous function with keyword arguments
     """
-    # Test case 4: Synchronous function that raises an error
-    with pytest.raises(ValueError, match="This is an example error"):
-        await wrapped_sync_function_with_error(1, 2)
+    # Test case 3: Synchronous function with keyword arguments
+    result = await sample_function_with_kwargs(1, 2, z=3)
+    assert result == 6
+
+@pytest.mark.asyncio
+async def test_sync_function_with_mixed_args_kwargs():
+    """
+    Test case 4: Synchronous function with mixed positional and keyword arguments
+    """
+    # Test case 4: Synchronous function with mixed positional and keyword arguments
+    result = await sample_function_with_mixed_args_kwargs(1, 2, 3, 4, z=5, a=6, b=7)
+    assert result == 28
+
+@pytest.mark.asyncio
+async def test_sync_function_with_no_args():
+    """
+    Test case 5: Synchronous function with no arguments
+    """
+    # Test case 5: Synchronous function with no arguments
+    result = await sample_function_no_args()
+    assert result == "success"
+
+def test_async_function():
+    """
+    Test case 6: Asynchronous function that raises an error
+    """
+    # Test case 6: Asynchronous function that raises an TypeError
+    with pytest.raises(TypeError, match="The function to be wrapped must be synchronous"):
+        @async_wrapper
+        async def sample_function(x: int, y: int) -> int:
+            return x + y
+
+@pytest.mark.asyncio
+async def test_sync_function_with_logger_raises_value_error():
+    """
+    Test case 7: Synchronous function that raises a ValueError
+    """
+    # Test case 7: Synchronous function that raises a ValueError
+    with pytest.raises(ValueError, match="Test exception"):
+        result = await sample_function_exception(1, 2)
+    assert result is None
+
+def test_async_function_with_logger(caplog):
+    """
+    Test case 8: Asynchronous function that logs an error with logging enabled
+    """
+    # Test case 8: Asynchronous function that logs an error with logging enabled
+    with caplog.at_level(logging.ERROR):
+        @async_wrapper(logger=test_logger)
+        async def sample_function(x: int, y: int) -> int:
+            return x + y
+        assert "An error occurred in sample_function: The function to be wrapped must be synchronous" in caplog.text
+
+@pytest.mark.asyncio
+async def test_sync_function_with_logger(caplog):
+    """
+    Test case 9: Synchronous function that logs an exception with logging enabled
+    """
+    # Test case 9: Synchronous function that logs an exception with logging enabled
+    with caplog.at_level(logging.ERROR):
+        result = await sample_function_with_logger(1, 2)
+        assert result is None
+        assert "An error occurred in sample_function_with_logger: Test exception" in caplog.text
