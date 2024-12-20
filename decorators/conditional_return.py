@@ -1,55 +1,43 @@
-from typing import Callable, Any, TypeVar
+from typing import Callable, Any, TypeVar, Union
 
 T = TypeVar('T')
 
-def conditional_return(condition: Callable[..., bool], return_value: T) -> Callable[[Callable[..., T]], Callable[..., T]]:
+def chain(func: Callable[..., T]) -> Callable[..., Union[T, Any]]:
     """
-    Decorator to conditionally return a specified value based on a condition.
+    Decorator to call the 'chain' method on the result of a function if it exists.
 
     Parameters
     ----------
-    condition : Callable[..., bool]
-        A function that returns a boolean value. The decorated function will return the specified value if this condition returns True.
-    return_value : T
-        The value to return if the condition is met.
+    func : Callable[..., T]
+        The function to be wrapped.
 
     Returns
     -------
-    Callable[[Callable[..., T]], Callable[..., T]]
-        A decorator that wraps the input function with conditional return logic.
+    Callable[..., Union[T, Any]]
+        A wrapper function that calls the 'chain' method on the result of the input function if it exists.
     """
-    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+    if not callable(func):
+        raise TypeError("The function to be wrapped must be callable")
+
+    def wrapper(*args: Any, **kwargs: Any) -> Union[T, Any]:
         """
-        Decorator function.
+        Wrapper function to call the 'chain' method on the result of the input function if it exists.
 
         Parameters
         ----------
-        func : Callable[..., T]
-            The function to be conditionally executed.
+        *args : Any
+            Positional arguments to pass to the wrapped function.
+        **kwargs : Any
+            Keyword arguments to pass to the wrapped function.
 
         Returns
         -------
-        Callable[..., T]
-            The wrapped function with conditional return logic.
+        Union[T, Any]
+            The result of the wrapped function, or the result of calling its 'chain' method if it exists.
         """
-        def wrapper(*args: Any, **kwargs: Any) -> T:
-            """
-            Wrapper function to conditionally return a specified value.
-
-            Parameters
-            ----------
-            *args : Any
-                Positional arguments to pass to the wrapped function.
-            **kwargs : Any
-                Keyword arguments to pass to the wrapped function.
-
-            Returns
-            -------
-            T
-                The specified return value if the condition is met, otherwise the result of the wrapped function.
-            """
-            if condition(*args, **kwargs):
-                return return_value
-            return func(*args, **kwargs)
-        return wrapper
-    return decorator
+        result = func(*args, **kwargs)
+        if hasattr(result, 'chain') and callable(getattr(result, 'chain')):
+            return result.chain()
+        return result
+    
+    return wrapper

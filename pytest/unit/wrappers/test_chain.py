@@ -90,3 +90,13 @@ def test_chain_with_chainable_method_not_callable():
     result = return_chainable_with_non_callable_chain(5)
     assert isinstance(result, ChainableWithNonCallableChain)
     assert result.value == 5  # chain attribute is not callable, should return the object directly
+
+def test_chain_invalid_function():
+    """
+    Test the chain decorator with an invalid function.
+    """
+    # Test case 5: Invalid function
+    with pytest.raises(TypeError, match="The function to be wrapped must be callable"):
+        @chain("not a callable")
+        def invalid_func(x: int) -> int:
+            return x
