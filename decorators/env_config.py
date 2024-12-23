@@ -89,9 +89,7 @@ def env_config(var_name: str, logger: Optional[logging.Logger] = None,
                         logger.info(message)
                     else:
                         print(message)
-            if required:
-                return func(*args, **kwargs, env_var_value=value)
-            else:
-                return func(*args, **kwargs)
+            return func(*args, **kwargs, env_var_value=value)
         return wrapper
+    
     return decorator
