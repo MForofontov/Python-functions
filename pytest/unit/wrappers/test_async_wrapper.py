@@ -87,7 +87,7 @@ async def test_sync_function_with_no_args():
 
 def test_async_function():
     """
-    Test case 6: Asynchronous function that raises an error
+    Test case 6: Asynchronous function that raises an TypeError
     """
     # Test case 6: Asynchronous function that raises an TypeError
     with pytest.raises(TypeError, match="The function to be wrapped must be synchronous"):
@@ -107,7 +107,7 @@ async def test_sync_function_with_logger_raises_value_error():
 
 def test_async_function_with_logger(caplog):
     """
-    Test case 8: Asynchronous function that logs an error with logging enabled
+    Test case 8: Asynchronous function that logs an TypeError with logging enabled
     """
     # Test case 8: Asynchronous function that logs an error with logging enabled
     with caplog.at_level(logging.ERROR):
