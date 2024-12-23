@@ -1,59 +1,57 @@
 import logging
-from typing import Callable, Any, get_type_hints, Optional
+from typing import Callable, Any, get_type_hints, Optional, Union
 
-def enforce_types(func: Callable[..., Any], logger: Optional[logging.Logger] = None) -> Callable[..., Any]:
+def enforce_types(logger: Optional[logging.Logger] = None) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
-    A decorator to enforce type hints on the arguments of a function.
+    A decorator to enforce type checking on the arguments and return value of a function.
 
     Parameters
     ----------
-    func : Callable[..., Any]
-        The function to be decorated.
     logger : Optional[logging.Logger]
-        The logger to use for logging errors. If None, the default logger is used.
+        The logger to use for logging type errors.
 
     Returns
     -------
-    Callable[..., Any]
-        The decorated function with type enforcement.
-
-    Raises
-    ------
-    TypeError
-        If an argument does not match the expected type.
+    Callable[[Callable[..., Any]], Callable[..., Any]]
+        The decorator function.
     """
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         """
-        The wrapper function that checks the types of the arguments.
+        The actual decorator function.
 
         Parameters
         ----------
-        *args : Any
-            Positional arguments for the decorated function.
-        **kwargs : Any
-            Keyword arguments for the decorated function.
+        func : Callable[..., Any]
+            The function to be decorated.
 
         Returns
         -------
-        Any
-            The result of the decorated function.
-
-        Raises
-        ------
-        TypeError
-            If an argument does not match the expected type.
+        Callable[..., Any]
+            The wrapped function.
         """
-        hints = get_type_hints(func)
-        for arg_name, arg_value in zip(hints.keys(), args):
-            expected_type = hints[arg_name]
-            if not isinstance(arg_value, expected_type):
-                error_message = f"Expected {expected_type} for argument '{arg_name}', got {type(arg_value)}."
-                if logger:
-                    logger.error(error_message, exc_info=True)
-                else:
-                    raise TypeError(error_message)
-        for arg_name, arg_value in kwargs.items():
-            if arg_name in hints:
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            """
+            The wrapper function that checks the types of the arguments and return value.
+
+            Parameters
+            ----------
+            *args : Any
+                Positional arguments for the decorated function.
+            **kwargs : Any
+                Keyword arguments for the decorated function.
+
+            Returns
+            -------
+            Any
+                The result of the decorated function.
+
+            Raises
+            ------
+            TypeError
+                If an argument or return value does not match the expected type.
+            """
+            hints = get_type_hints(func)
+            for arg_name, arg_value in zip(hints.keys(), args):
                 expected_type = hints[arg_name]
                 if not isinstance(arg_value, expected_type):
                     error_message = f"Expected {expected_type} for argument '{arg_name}', got {type(arg_value)}."
@@ -61,7 +59,26 @@ def enforce_types(func: Callable[..., Any], logger: Optional[logging.Logger] = N
                         logger.error(error_message, exc_info=True)
                     else:
                         raise TypeError(error_message)
-        return func(*args, **kwargs)
+            for arg_name, arg_value in kwargs.items():
+                if arg_name in hints:
+                    expected_type = hints[arg_name]
+                    if not isinstance(arg_value, expected_type):
+                        error_message = f"Expected {expected_type} for argument '{arg_name}', got {type(arg_value)}."
+                        if logger:
+                            logger.error(error_message, exc_info=True)
+                        else:
+                            raise TypeError(error_message)
+            result = func(*args, **kwargs)
+            if 'return' in hints:
+                expected_return_type = hints['return']
+                if not isinstance(result, expected_return_type):
+                    error_message = f"Expected return type {expected_return_type}, got {type(result)}."
+                    if logger:
+                        logger.error(error_message, exc_info=True)
+                    else:
+                        raise TypeError(error_message)
+            return result
 
-    return wrapper
-    
+        return wrapper
+
+    return decorator
