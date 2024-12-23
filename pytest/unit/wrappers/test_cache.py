@@ -1,90 +1,116 @@
 import pytest
 from decorators.cache import cache
 
-# Dictionary to keep track of function execution counts
-execution_count = {
-    "add": 0,
-    "multiply": 0,
-    "concat_strings": 0,
-    "greet": 0
+call_counts = {
+    'add': 0,
+    'concat': 0
 }
 
 @cache
-def add(x: int, y: int) -> int:
-    """
-    Function that adds two integers.
-    """
-    execution_count["add"] += 1
-    return x + y
-
-@cache
-def multiply(x: int, y: int) -> int:
-    """
-    Function that multiplies two integers.
-    """
-    execution_count["multiply"] += 1
-    return x * y
-
-@cache
-def concat_strings(a: str, b: str) -> str:
-    """
-    Function that concatenates two strings.
-    """
-    execution_count["concat_strings"] += 1
+def add(a, b=0):
+    call_counts['add'] += 1
     return a + b
 
-def test_cache_add():
+@cache
+def concat(*args, **kwargs):
+    call_counts['concat'] += 1
+    return ''.join(args) + ''.join(kwargs.values())
+
+def test_cache_basic():
     """
-    Test the cache decorator with the add function.
+    Test case 1: Basic caching functionality
     """
-    # Test case 1: Add function
+    # Test case 1: Basic caching functionality
+    call_counts['add'] = 0
     assert add(1, 2) == 3
-    assert add(1, 2) == 3  # Cached result
-    assert execution_count["add"] == 1  # Should only be executed once
-
-def test_cache_multiply():
-    """
-    Test the cache decorator with the multiply function.
-    """
-    # Test case 2: Multiply function
-    assert multiply(2, 3) == 6
-    assert multiply(2, 3) == 6  # Cached result
-    assert execution_count["multiply"] == 1  # Should only be executed once
-
-def test_cache_concat_strings():
-    """
-    Test the cache decorator with the concat_strings function.
-    """
-    # Test case 3: Concat strings function
-    assert concat_strings("hello", "world") == "helloworld"
-    assert concat_strings("hello", "world") == "helloworld"  # Cached result
-    assert execution_count["concat_strings"] == 1  # Should only be executed once
+    assert add(1, 2) == 3  # Should return cached result
+    assert call_counts['add'] == 1  # Function should be called only once
+    call_counts['add'] = 0
 
 def test_cache_different_args():
     """
-    Test the cache decorator with different arguments.
+    Test case 2: Caching with different arguments
     """
-    # Test case 4: Different arguments
-    assert add(2, 3) == 5
-    assert add(2, 3) == 5  # Cached result
-    assert add(3, 2) == 5  # Different arguments, not cached
-    assert execution_count["add"] == 2  # Should be executed twice
+    # Test case 2: Caching with different arguments
+    call_counts['add'] = 0
+    assert add(1, 2) == 3
+    assert add(2, 3) == 5  # Different arguments, should not use cache
+    assert call_counts['add'] == 2  # Function should be called twice
+    call_counts['add'] = 0
 
 def test_cache_with_kwargs():
     """
-    Test the cache decorator with keyword arguments.
+    Test case 3: Caching with keyword arguments
     """
-    # Test case 5: Keyword arguments
-    @cache
-    def greet(greeting: str, name: str = "world") -> str:
-        """
-        Function that returns a greeting message.
-        """
-        execution_count["greet"] += 1
-        return f"{greeting}, {name}!"
+    # Test case 3: Caching with keyword arguments
+    call_counts['add'] = 0
+    assert add(a=1, b=2) == 3
+    assert add(a=1, b=2) == 3  # Should return cached result
+    assert call_counts['add'] == 1  # Function should be called only once
+    call_counts['add'] = 0
 
-    assert greet("Hello") == "Hello, world!"
-    assert greet("Hello") == "Hello, world!"  # Cached result
-    assert greet("Hello", name="Alice") == "Hello, Alice!"
-    assert greet("Hello", name="Alice") == "Hello, Alice!"  # Cached result
-    assert execution_count["greet"] == 2  # Should be executed twice
+def test_cache_concat():
+    """
+    Test case 4: Caching with variable arguments
+    """
+    # Test case 4: Caching with variable arguments
+    call_counts['concat'] = 0
+    assert concat('a', 'b', 'c') == 'abc'
+    assert concat('a', 'b', 'c') == 'abc'  # Should return cached result
+    assert call_counts['concat'] == 1  # Function should be called only once
+    call_counts['concat'] = 0
+
+def test_cache_concat_different_args():
+    """
+    Test case 5: Caching with different variable arguments
+    """
+    # Test case 5: Caching with different variable arguments
+    call_counts['concat'] = 0
+    assert concat('a', 'b', 'c') == 'abc'
+    assert concat('x', 'y', 'z') == 'xyz'  # Different arguments, should not use cache
+    assert call_counts['concat'] == 2  # Function should be called twice
+    call_counts['concat'] = 0
+
+def test_cache_concat_kwargs():
+    """
+    Test case 6: Caching with keyword arguments in concat function
+    """
+    # Test case 6: Caching with keyword arguments in concat function
+    call_counts['concat'] = 0
+    assert concat(a='a', b='b', c='c') == 'abc'
+    assert concat(a='a', b='b', c='c') == 'abc'  # Should return cached result
+    assert call_counts['concat'] == 1  # Function should be called only once
+    call_counts['concat'] = 0
+
+def test_cache_concat_different_kwargs():
+    """
+    Test case 7: Caching with different keyword arguments in concat function
+    """
+    # Test case 7: Caching with different keyword arguments in concat function
+    call_counts['concat'] = 0
+    assert concat(a='a', b='b', c='c') == 'abc'
+    assert concat(x='x', y='y', z='z') == 'xyz'  # Different arguments, should not use cache
+    assert call_counts['concat'] == 2  # Function should be called twice
+    call_counts['concat'] = 0
+
+def test_cache_concat_mixed_args():
+    """
+    Test case 8: Caching with mixed positional and keyword arguments in concat function
+    """
+    # Test case 8: Caching with mixed positional and keyword arguments in concat function
+    call_counts['concat'] = 0
+    assert concat('a', 'b', c='c', d='d') == 'abcd'
+    assert concat('a', 'b', c='c', d='d') == 'abcd'  # Should return cached result
+    assert call_counts['concat'] == 1  # Function should be called only once
+    call_counts['concat'] = 0
+
+def test_cache_concat_different_mixed_args():
+    """
+    Test case 9: Caching with different mixed positional and keyword arguments in concat function
+    """
+    # Test case 9: Caching with different mixed positional and keyword arguments in concat function
+    call_counts['concat'] = 0
+    assert concat('a', 'b', c='c', d='d') == 'abcd'
+    assert concat('x', 'y', z='z', w='w') == 'xyzw'  # Different arguments, should not use cache
+    assert call_counts['concat'] == 2  # Function should be called twice
+    call_counts['concat'] = 0
