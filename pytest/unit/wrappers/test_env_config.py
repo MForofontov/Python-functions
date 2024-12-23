@@ -1,7 +1,7 @@
 import os
 import pytest
 import logging
-from env_config import env_config
+from decorators.env_config import env_config
 
 # Configure test_logger
 test_logger = logging.getLogger('test_logger')
