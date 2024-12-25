@@ -19,6 +19,7 @@ def test_valid_types():
     """
     Test case 1: Valid types for arguments and return value
     """
+    # Test case 1: Valid types for arguments and return value
     result = sample_function(1, "test")
     assert result == "1 - test"
 
@@ -26,6 +27,7 @@ def test_valid_types_with_logger(caplog):
     """
     Test case 2: Valid types for arguments and return value, with logger
     """
+    # Test case 2: Valid types for arguments and return value, with logger
     @enforce_types(logger=test_logger)
     def sample_function_valid_with_logger(a: int, b: str) -> str:
         return f"{a} - {b}"
@@ -40,6 +42,7 @@ def test_invalid_argument_type():
     """
     Test case 3: Invalid type for argument, no logger provided
     """
+    # Test case 3: Invalid type for argument, no logger provided
     @enforce_types()
     def sample_function_invalid_arg(a: int, b: str) -> str:
         return f"{a} - {b}"
@@ -51,6 +54,7 @@ def test_invalid_return_type():
     """
     Test case 4: Invalid type for return value, no logger provided
     """
+    # Test case 4: Invalid type for return value, no logger provided
     @enforce_types()
     def sample_function_invalid_return(a: int, b: str) -> int:
         return f"{a} - {b}"
@@ -62,6 +66,7 @@ def test_invalid_argument_type_with_logger(caplog):
     """
     Test case 5: Invalid type for argument, with logger
     """
+    # Test case 5: Invalid type for argument, with logger
     @enforce_types(logger=test_logger)
     def sample_function_invalid_arg_with_logger(a: int, b: str) -> str:
         return f"{a} - {b}"
@@ -75,6 +80,7 @@ def test_invalid_return_type_with_logger(caplog):
     """
     Test case 6: Invalid type for return value, with logger
     """
+    # Test case 6: Invalid type for return value, with logger
     @enforce_types(logger=test_logger)
     def sample_function_invalid_return_with_logger(a: int, b: str) -> int:
         return f"{a} - {b}"
@@ -88,6 +94,7 @@ def test_invalid_argument_type_with_kwargs():
     """
     Test case 7: Invalid type for argument with kwargs, no logger provided
     """
+    # Test case 7: Invalid type for argument with kwargs, no logger provided
     @enforce_types()
     def sample_function_invalid_arg_kwargs(a: int, b: str) -> str:
         return f"{a} - {b}"
@@ -99,6 +106,7 @@ def test_invalid_argument_type_with_kwargs_and_logger(caplog):
     """
     Test case 8: Invalid type for argument with kwargs, with logger
     """
+    # Test case 8: Invalid type for argument with kwargs, with logger
     @enforce_types(logger=test_logger)
     def sample_function_invalid_arg_kwargs_with_logger(a: int, b: str) -> str:
         return f"{a} - {b}"
@@ -112,6 +120,7 @@ def test_valid_types_with_kwargs():
     """
     Test case 9: Valid types for arguments with kwargs
     """
+    # Test case 9: Valid types for arguments with kwargs
     @enforce_types()
     def sample_function_valid_kwargs(a: int, b: str) -> str:
         return f"{a} - {b}"
@@ -123,6 +132,7 @@ def test_valid_types_with_kwargs_and_logger(caplog):
     """
     Test case 10: Valid types for arguments with kwargs, with logger
     """
+    # Test case 10: Valid types for arguments with kwargs, with logger
     @enforce_types(logger=test_logger)
     def sample_function_valid_kwargs_with_logger(a: int, b: str) -> str:
         return f"{a} - {b}"
@@ -137,6 +147,7 @@ def test_missing_type_annotations():
     """
     Test case 11: Function without type annotations
     """
+    # Test case 11: Function without type annotations
     @enforce_types()
     def sample_function_no_annotations(a, b):
         return f"{a} - {b}"
@@ -148,6 +159,7 @@ def test_mixed_valid_and_invalid_arguments():
     """
     Test case 12: Mixed valid and invalid arguments
     """
+    # Test case 12: Mixed valid and invalid arguments
     @enforce_types()
     def sample_function_mixed_args(a: int, b: str, c: float) -> str:
         return f"{a} - {b} - {c}"
@@ -159,6 +171,7 @@ def test_default_argument_values():
     """
     Test case 13: Function with default argument values
     """
+    # Test case 13: Function with default argument values
     @enforce_types()
     def sample_function_default_args(a: int, b: str = "default") -> str:
         return f"{a} - {b}"
@@ -170,6 +183,7 @@ def test_variable_length_arguments():
     """
     Test case 14: Function with variable length arguments (*args and **kwargs)
     """
+    # Test case 14: Function with variable length arguments (*args and **kwargs)
     @enforce_types()
     def sample_function_var_args(a: int, *args: str, **kwargs: float) -> str:
         return f"{a} - {args} - {kwargs}"
@@ -181,6 +195,7 @@ def test_invalid_logger_type():
     """
     Test case 15: Invalid logger type
     """
+    # Test case 15: Invalid logger type
     with pytest.raises(TypeError, match="logger must be an instance of logging.Logger or None"):
         @enforce_types(logger="invalid_logger")
         def sample_function_invalid_logger(a: int, b: str) -> str:

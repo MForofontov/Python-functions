@@ -15,7 +15,15 @@ def deprecated(logger: Optional[logging.Logger] = None) -> Callable[[Callable[..
     -------
     Callable[[Callable[..., Any]], Callable[..., Any]]
         A decorator that wraps the input function with deprecation warning logic.
+
+    Raises
+    ------
+    TypeError
+        If the logger is not an instance of logging.Logger or None.
     """
+    if not isinstance(logger, logging.Logger) and logger is not None:
+        raise TypeError("logger must be an instance of logging.Logger or None")
+
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         """
         Decorator function to wrap the input function.

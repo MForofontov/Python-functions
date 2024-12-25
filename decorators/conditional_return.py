@@ -56,8 +56,11 @@ def conditional_return(condition: Callable[..., bool], return_value: T) -> Calla
             T
                 The specified return value if the condition is met, otherwise the result of the wrapped function.
             """
-            if condition(*args, **kwargs):
-                return return_value
+            try:
+                if condition(*args, **kwargs):
+                    return return_value
+            except Exception as e:
+                raise RuntimeError(f"Condition function raised an error: {e}")
             return func(*args, **kwargs)
         return wrapper
     return decorator
