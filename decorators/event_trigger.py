@@ -56,12 +56,14 @@ class EventManager:
             for callback in self.events[event_name]:
                 callback(*args, **kwargs)
 
-def event_trigger(event_name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def event_trigger(event_manager: EventManager, event_name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     A decorator to trigger an event before executing the decorated function.
 
     Parameters
     ----------
+    event_manager : EventManager
+        The EventManager instance to use for triggering the event.
     event_name : str
         The name of the event to trigger.
 
@@ -70,6 +72,12 @@ def event_trigger(event_name: str) -> Callable[[Callable[..., Any]], Callable[..
     Callable[[Callable[..., Any]], Callable[..., Any]]
         The decorator function.
     """
+    if not isinstance(event_manager, EventManager) or not event_manager:
+        raise TypeError("event_manager be a non-empty instance of EventManager")
+
+    if not isinstance(event_name, str) or not event_name:
+        raise TypeError("event_name must be a non-empty string")
+
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         """
         The actual decorator function.
@@ -100,9 +108,7 @@ def event_trigger(event_name: str) -> Callable[[Callable[..., Any]], Callable[..
             Any
                 The result of the decorated function.
             """
-            EventManager().trigger(event_name, *args, **kwargs)
+            event_manager.trigger(event_name, *args, **kwargs)
             return func(*args, **kwargs)
         return wrapper
     return decorator
-
-

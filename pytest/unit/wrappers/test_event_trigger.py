@@ -26,13 +26,14 @@ def reset_callbacks():
 
 # Subscribe callbacks to events
 event_manager.subscribe("event_one", callback_one)
+event_manager.subscribe("event_two", callback_one)
 event_manager.subscribe("event_two", callback_two)
 
-@event_trigger("event_one")
+@event_trigger(event_manager, "event_one")
 def example_function_one(a, b):
     return f"Result: {a + b}"
 
-@event_trigger("event_two")
+@event_trigger(event_manager, "event_two")
 def example_function_two(a, b):
     return f"Result: {a * b}"
 
@@ -40,6 +41,7 @@ def test_event_trigger_single_callback():
     """
     Test case 1: Single callback triggered
     """
+    # Test case 1: Single callback triggered
     reset_callbacks()
     result = example_function_one(1, 2)
     assert result == "Result: 3"
@@ -51,26 +53,22 @@ def test_event_trigger_multiple_callbacks():
     """
     Test case 2: Multiple callbacks triggered
     """
+    # Test case 2: Multiple callbacks triggered
     reset_callbacks()
     result = example_function_two(2, 3)
     assert result == "Result: 6"
     assert callback_two.called
     assert callback_two.args == (2, 3)
     assert callback_two.kwargs == {}
-
-def test_event_trigger_no_callbacks():
-    """
-    Test case 3: No callbacks triggered
-    """
-    reset_callbacks()
-    event_manager.trigger("event_three")
-    assert not callback_one.called
-    assert not callback_two.called
+    assert callback_one.called
+    assert callback_one.args == (2, 3)
+    assert callback_one.kwargs == {}
 
 def test_event_trigger_with_args_and_kwargs():
     """
-    Test case 4: Callbacks with arguments and keyword arguments
+    Test case 3: Callbacks with arguments and keyword arguments
     """
+    # Test case 3: Callbacks with arguments and keyword arguments
     reset_callbacks()
     event_manager.trigger("event_one", 1, 2, key="value")
     assert callback_one.called
@@ -79,20 +77,31 @@ def test_event_trigger_with_args_and_kwargs():
 
 def test_event_trigger_invalid_event():
     """
-    Test case 5: Triggering an invalid event
+    Test case 4: Triggering an invalid event
     """
+    # Test case 4: Triggering an invalid event
     reset_callbacks()
     event_manager.trigger("invalid_event")
     assert not callback_one.called
     assert not callback_two.called
 
-def test_event_trigger_decorator():
+def test_event_trigger_invalid_event_manager():
     """
-    Test case 6: Using the event_trigger decorator
+    Test case 5: Invalid event manager type
     """
-    reset_callbacks()
-    result = example_function_one(3, 4)
-    assert result == "Result: 7"
-    assert callback_one.called
-    assert callback_one.args == (3, 4)
-    assert callback_one.kwargs == {}
+    # Test case 5: Invalid event manager type
+    with pytest.raises(TypeError, match="event_manager be a non-empty instance of EventManager"):
+        @event_trigger("invalid_event_manager", "event_one")
+        def example_function_invalid_event_manager(a, b):
+            return f"Result: {a + b}"
+
+def test_event_trigger_no_event_name():
+    """
+    Test case 6: No event name provided
+    """
+    # Test case 6: No event name provided
+    with pytest.raises(TypeError, match="event_name must be a non-empty string"):
+        @event_trigger(event_manager, "")
+        def example_function_no_event_name(a, b):
+            return f"Result: {a + b}"
+
