@@ -1,6 +1,6 @@
 import pytest
 import logging
-from deprecated import deprecated
+from decorators.deprecated import deprecated
 
 # Configure test_logger
 test_logger = logging.getLogger('test_logger')
