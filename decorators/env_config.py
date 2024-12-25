@@ -45,6 +45,7 @@ def env_config(var_name: str, logger: Optional[logging.Logger] = None,
     
     if not isinstance(custom_message, str) and custom_message is not None:
         raise TypeError("custom_message must be a string or None")
+
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         """
         The actual decorator function.
