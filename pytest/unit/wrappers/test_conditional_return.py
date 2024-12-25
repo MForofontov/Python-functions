@@ -11,6 +11,12 @@ def always_false(*args, **kwargs):
 def condition_based_on_args(a, b):
     return a > b
 
+def condition_no_args():
+    return True
+
+def condition_raises_exception(*args, **kwargs):
+    raise ValueError("Condition raised an exception")
+
 # Example functions to be decorated
 @conditional_return(always_true, "Condition met")
 def example_function_true(a, b):
@@ -22,6 +28,14 @@ def example_function_false(a, b):
 
 @conditional_return(condition_based_on_args, "Condition met")
 def example_function_conditional(a, b):
+    return f"Result: {a + b}"
+
+@conditional_return(condition_no_args, "Condition met")
+def example_function_no_args(a, b):
+    return f"Result: {a + b}"
+
+@conditional_return(condition_raises_exception, "Condition met")
+def example_function_raises_exception(a, b):
     return f"Result: {a + b}"
 
 def test_conditional_return_always_true():
@@ -107,3 +121,17 @@ def test_conditional_return_with_default_args():
     
     result = example_function_default_args(1, 2)
     assert result == "Result: 3"
+
+def test_conditional_return_no_args():
+    """
+    Test case 9: Condition with no arguments
+    """
+    result = example_function_no_args(1, 2)
+    assert result == "Condition met"
+
+def test_conditional_return_condition_raises_exception():
+    """
+    Test case 10: Condition raises an exception
+    """
+    with pytest.raises(ValueError, match="Condition raised an exception"):
+        example_function_raises_exception(1, 2)
