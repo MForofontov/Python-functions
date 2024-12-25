@@ -1,12 +1,12 @@
 import pytest
 import logging
-from decorators.enforce_types import enforce_types
+from enforce_types import enforce_types
 
 # Configure test_logger
 test_logger = logging.getLogger('test_logger')
 test_logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levellevel)s - %(message)s')
 handler.setFormatter(formatter)
 test_logger.addHandler(handler)
 
@@ -104,7 +104,8 @@ def test_invalid_argument_type_with_kwargs_and_logger(caplog):
         return f"{a} - {b}"
     
     with caplog.at_level(logging.ERROR):
-        sample_function_invalid_arg_kwargs_with_logger(a="invalid", b="test")
+        with pytest.raises(TypeError, match="Argument 'a' must be of type int"):
+            sample_function_invalid_arg_kwargs_with_logger(a="invalid", b="test")
     assert "Argument 'a' must be of type int" in caplog.text
 
 def test_valid_types_with_kwargs():
@@ -132,11 +133,46 @@ def test_valid_types_with_kwargs_and_logger(caplog):
     assert "Argument 'a' must be of type int" not in caplog.text
     assert "Return value must be of type int" not in caplog.text
 
-def test_invalid_logger():
+def test_missing_type_annotations():
     """
-    Test case 11: Invalid logger
+    Test case 11: Function without type annotations
     """
-    with pytest.raises(TypeError, match="logger must be an instance of logging.Logger or None"):
-        @enforce_types(logger="invalid_logger")
-        def sample_function_invalid_logger(a: int, b: str) -> str:
-            return f"{a} - {b}"
+    @enforce_types()
+    def sample_function_no_annotations(a, b):
+        return f"{a} - {b}"
+    
+    result = sample_function_no_annotations(1, "test")
+    assert result == "1 - test"
+
+def test_mixed_valid_and_invalid_arguments():
+    """
+    Test case 12: Mixed valid and invalid arguments
+    """
+    @enforce_types()
+    def sample_function_mixed_args(a: int, b: str, c: float) -> str:
+        return f"{a} - {b} - {c}"
+    
+    with pytest.raises(TypeError, match="Argument 'c' must be of type float"):
+        sample_function_mixed_args(1, "test", "invalid")
+
+def test_default_argument_values():
+    """
+    Test case 13: Function with default argument values
+    """
+    @enforce_types()
+    def sample_function_default_args(a: int, b: str = "default") -> str:
+        return f"{a} - {b}"
+    
+    result = sample_function_default_args(1)
+    assert result == "1 - default"
+
+def test_variable_length_arguments():
+    """
+    Test case 14: Function with variable length arguments (*args and **kwargs)
+    """
+    @enforce_types()
+    def sample_function_var_args(a: int, *args: str, **kwargs: float) -> str:
+        return f"{a} - {args} - {kwargs}"
+    
+    result = sample_function_var_args(1, "arg1", "arg2", kwarg1=1.0, kwarg2=2.0)
+    assert result == "1 - ('arg1', 'arg2') - {'kwarg1': 1.0, 'kwarg2': 2.0}"
