@@ -100,11 +100,9 @@ def event_trigger(event_name: str) -> Callable[[Callable[..., Any]], Callable[..
             Any
                 The result of the decorated function.
             """
-            event_manager.trigger(event_name, *args, **kwargs)
+            EventManager().trigger(event_name, *args, **kwargs)
             return func(*args, **kwargs)
         return wrapper
     return decorator
 
-# Initialize EventManager
-event_manager = EventManager()
 
