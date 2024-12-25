@@ -22,9 +22,9 @@ def sample_function_logger(env_var_value=None):
 
 def test_env_var_set(monkeypatch, capsys):
     """
-    Test case 1: Environment variable is set, no logger provided
+    Test case 1: Environment variable is set with default message, no logger provided
     """
-    # Test case 1: Environment variable is set, no logger provided
+    # Test case 1: Environment variable is set with default message, no logger provided
     monkeypatch.setenv('TEST_ENV_VAR', 'test_value')
     result = sample_function()
     captured = capsys.readouterr()
@@ -33,9 +33,9 @@ def test_env_var_set(monkeypatch, capsys):
 
 def test_env_var_set_logger(monkeypatch, caplog):
     """
-    Test case 2: Environment variable is set, logger provided
+    Test case 2: Environment variable is set with custom message, logger provided
     """
-    # Test case 2: Environment variable is set, logger provided
+    # Test case 2: Environment variable is set with custom message, logger provided
     monkeypatch.setenv('TEST_ENV_VAR', 'test_value')
     with caplog.at_level(logging.INFO):
         result = sample_function_logger()
@@ -44,9 +44,9 @@ def test_env_var_set_logger(monkeypatch, caplog):
 
 def test_env_var_not_set(monkeypatch, capsys):
     """
-    Test case 3: Environment variable is not set, no logger provided
+    Test case 3: Environment variable is not set with default message, no logger provided
     """
-    # Test case 3: Environment variable is not set, no logger provided
+    # Test case 3: Environment variable is not set with default message, no logger provided
     monkeypatch.delenv('TEST_ENV_VAR', raising=False)
     result = sample_function()
     captured = capsys.readouterr()
@@ -55,9 +55,9 @@ def test_env_var_not_set(monkeypatch, capsys):
 
 def test_env_var_not_set_logger(monkeypatch, caplog):
     """
-    Test case 4: Environment variable is not set, logger provided
+    Test case 4: Environment variable is not set with custom message, logger provided
     """
-    # Test case 4: Environment variable is not set, logger provided
+    # Test case 4: Environment variable is not set with custom message, logger provided
     monkeypatch.delenv('TEST_ENV_VAR', raising=False)
     with caplog.at_level(logging.INFO):
         result = sample_function_logger()
