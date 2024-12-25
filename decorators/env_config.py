@@ -33,20 +33,30 @@ def env_config(var_name: str, logger: Optional[logging.Logger] = None,
     TypeError
         If any of the parameters do not match the expected types.
     """
-    if not isinstance(var_name, str):
-        raise TypeError("var_name must be a non-empty string")
-    
+    def log_or_raise_error(message: str):
+        """
+        Helper function to log an error or raise an exception.
+        """
+        if logger:
+            logger.error(message)
+        else:
+            raise TypeError(message)
+
     if not isinstance(logger, logging.Logger) and logger is not None:
         raise TypeError("logger must be an instance of logging.Logger or None")
+
+    if not isinstance(var_name, str) or not var_name:
+        log_or_raise_error("var_name must be a non-empty string")
     
     if not isinstance(required, bool):
-        raise TypeError("required must be a boolean")
+        log_or_raise_error("required must be a boolean")
     
     if not isinstance(var_type, type):
-        raise TypeError("var_type must be a type")
+        log_or_raise_error("var_type must be a type")
     
     if not isinstance(custom_message, str) and custom_message is not None:
-        raise TypeError("custom_message must be a string or None")
+        log_or_raise_error("custom_message must be a string or None")
+
     
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         """

@@ -132,21 +132,23 @@ def test_env_var_invalid_type_conversion_no_logger(monkeypatch, capsys):
     with pytest.raises(ValueError):
         sample_function_invalid_type_no_logger()
 
-def test_invalid_var_name():
+def test_invalid_logger():
     """
-    Test case 10: Invalid var_name (not a non-empty string)
+    Test case 10: Invalid logger (not an instance of logging.Logger or None)
     """
-    with pytest.raises(TypeError, match="var_name must be a non-empty string"):
-        @env_config(123)
+    # Test case 10: Invalid logger (not an instance of logging.Logger or None)
+    with pytest.raises(TypeError, match="logger must be an instance of logging.Logger or None"):
+        @env_config('TEST_ENV_VAR', logger="not_a_logger")
         def sample_function(env_var_value=None):
             return f"Function executed with env_var_value: {env_var_value}"
 
-def test_invalid_logger():
+def test_invalid_var_name():
     """
-    Test case 11: Invalid logger (not an instance of logging.Logger or None)
+    Test case 11: Invalid var_name (not a non-empty string)
     """
-    with pytest.raises(TypeError, match="logger must be an instance of logging.Logger or None"):
-        @env_config('TEST_ENV_VAR', logger="not_a_logger")
+    # Test case 11: Invalid var_name (not a non-empty string)
+    with pytest.raises(TypeError, match="var_name must be a non-empty string"):
+        @env_config(123)
         def sample_function(env_var_value=None):
             return f"Function executed with env_var_value: {env_var_value}"
 
@@ -154,6 +156,7 @@ def test_invalid_required():
     """
     Test case 12: Invalid required (not a boolean)
     """
+    # Test case 12: Invalid required (not a boolean)
     with pytest.raises(TypeError, match="required must be a boolean"):
         @env_config('TEST_ENV_VAR', required="not_a_boolean")
         def sample_function(env_var_value=None):
@@ -163,6 +166,7 @@ def test_invalid_var_type():
     """
     Test case 12: Invalid var_type (not a type)
     """
+    # Test case 12: Invalid var_type (not a type)
     with pytest.raises(TypeError, match="var_type must be a type"):
         @env_config('TEST_ENV_VAR', var_type="not_a_type")
         def sample_function(env_var_value=None):
@@ -172,6 +176,7 @@ def test_invalid_custom_message():
     """
     Test case 13: Invalid custom_message (not a string or None)
     """
+    # Test case 13: Invalid custom_message (not a string or None)
     with pytest.raises(TypeError, match="custom_message must be a string or None"):
         @env_config('TEST_ENV_VAR', custom_message=123)
         def sample_function(env_var_value=None):
