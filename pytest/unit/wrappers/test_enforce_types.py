@@ -176,3 +176,12 @@ def test_variable_length_arguments():
     
     result = sample_function_var_args(1, "arg1", "arg2", kwarg1=1.0, kwarg2=2.0)
     assert result == "1 - ('arg1', 'arg2') - {'kwarg1': 1.0, 'kwarg2': 2.0}"
+
+def test_invalid_logger_type():
+    """
+    Test case 15: Invalid logger type
+    """
+    with pytest.raises(TypeError, match="logger must be an instance of logging.Logger or None"):
+        @enforce_types(logger="invalid_logger")
+        def sample_function_invalid_logger(a: int, b: str) -> str:
+            return f"{a} - {b}"
