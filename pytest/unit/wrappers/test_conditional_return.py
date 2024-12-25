@@ -133,5 +133,5 @@ def test_conditional_return_condition_raises_exception():
     """
     Test case 10: Condition raises an exception
     """
-    with pytest.raises(ValueError, match="Condition raised an exception"):
+    with pytest.raises(RuntimeError, match="Condition function raised an error: Condition raised an exception"):
         example_function_raises_exception(1, 2)
