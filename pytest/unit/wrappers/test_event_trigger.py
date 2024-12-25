@@ -104,7 +104,7 @@ def test_event_trigger_invalid_event_manager():
         def example_function_invalid_event_manager(a, b):
             return f"Result: {a + b}"
 
-def test_event_trigger_no_event_name_with_çpgger(caplog):
+def test_event_trigger_no_event_name_with_logger(caplog):
     """
     Test case 6: No event name provided with logger
     """
