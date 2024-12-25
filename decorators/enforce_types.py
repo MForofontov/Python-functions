@@ -14,7 +14,15 @@ def enforce_types(logger: Optional[logging.Logger] = None) -> Callable[[Callable
     -------
     Callable[[Callable[..., Any]], Callable[..., Any]]
         The decorator function.
+    
+    Raises
+    ------
+    TypeError
+        If the logger is not an instance of logging.Logger or None.
     """
+    if not isinstance(logger, logging.Logger) and logger is not None:
+        raise TypeError("logger must be an instance of logging.Logger or None")
+    
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         """
         The actual decorator function.

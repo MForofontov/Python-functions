@@ -96,23 +96,52 @@ def test_event_trigger_invalid_event():
 
 def test_event_trigger_invalid_event_manager():
     """
-    Test case 5: Invalid event manager type
+    Test case 5: Invalid event manager type, no logger provided
     """
-    # Test case 5: Invalid event manager type
+    # Test case 5: Invalid event manager type, no logger provided
     with pytest.raises(TypeError, match="event_manager be a non-empty instance of EventManager"):
         @event_trigger("invalid_event_manager", "event_one")
         def example_function_invalid_event_manager(a, b):
             return f"Result: {a + b}"
 
-def test_event_trigger_no_event_name_with_logger(caplog):
+def test_event_trigger_invalid_event_name_type():
     """
-    Test case 6: No event name provided with logger
+    Test case 6: Invalid event name type, no logger provided
     """
-    # Test case 6: No event name provided with logger
-    with caplog.at_level(logging.ERROR):
-        @event_trigger(event_manager, "")
-        def example_function_no_event_name(a, b):
+    # Test case 6: Invalid event name type, no logger provided
+    with pytest.raises(TypeError, match="event_name must be a non-empty string"):
+        @event_trigger(event_manager, 123)
+        def example_function_invalid_event_name_type(a, b):
             return f"Result: {a + b}"
-    
-    assert "event_name must be a non-empty string" in caplog.text
 
+def test_event_trigger_invalid_logger():
+    """
+    Test case 7: Invalid logger (not an instance of logging.Logger or None)
+    """
+    # Test case 7: Invalid logger (not an instance of logging.Logger or None)
+    with pytest.raises(TypeError, match="logger must be an instance of logging.Logger or None"):
+        @event_trigger(event_manager, "event_one", logger="not_a_logger")
+        def example_function_invalid_logger(a, b):
+            return f"Result: {a + b}"
+
+def test_event_trigger_invalid_event_manager_logger(caplog):
+    """
+    Test case 8: Invalid event manager type, with logger provided
+    """
+    # Test case 8: Invalid event manager type, with logger provided
+    with caplog.at_level(logging.ERROR):
+        @event_trigger("invalid_event_manager", "event_one")
+        def example_function_invalid_event_manager(a, b):
+            return f"Result: {a + b}"
+    assert "event_manager be a non-empty instance of EventManager" in caplog.text
+
+def test_event_trigger_invalid_event_name_type_logger(caplog):
+    """
+    Test case 9: Invalid event name type, with logger provided
+    """
+    # Test case 9: Invalid event name type, with logger provided
+    with caplog.at_level(logging.ERROR):
+        @event_trigger(event_manager, 123)
+        def example_function_invalid_event_name_type(a, b):
+            return f"Result: {a + b}"
+    assert "event_name must be a non-empty string" in caplog.text
