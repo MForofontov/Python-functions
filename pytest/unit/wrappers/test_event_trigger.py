@@ -96,9 +96,9 @@ def test_event_trigger_invalid_event():
 
 def test_event_trigger_invalid_event_manager():
     """
-    Test case 5: Invalid event manager type
+    Test case 5: Invalid event manager type, no logger provided
     """
-    # Test case 5: Invalid event manager type
+    # Test case 5: Invalid event manager type, no logger provided
     with pytest.raises(TypeError, match="event_manager be a non-empty instance of EventManager"):
         @event_trigger("invalid_event_manager", "event_one")
         def example_function_invalid_event_manager(a, b):
@@ -106,9 +106,9 @@ def test_event_trigger_invalid_event_manager():
 
 def test_event_trigger_invalid_event_name_type():
     """
-    Test case 6: Invalid event name type
+    Test case 6: Invalid event name type, no logger provided
     """
-    # Test case 6: Invalid event name type
+    # Test case 6: Invalid event name type, no logger provided
     with pytest.raises(TypeError, match="event_name must be a non-empty string"):
         @event_trigger(event_manager, 123)
         def example_function_invalid_event_name_type(a, b):
@@ -126,9 +126,9 @@ def test_event_trigger_invalid_logger():
 
 def test_event_trigger_invalid_event_manager_logger(caplog):
     """
-    Test case 8: Invalid event manager type, with logging
+    Test case 8: Invalid event manager type, with logger provided
     """
-    # Test case 8: Invalid event manager type, with logging
+    # Test case 8: Invalid event manager type, with logger provided
     with caplog.at_level(logging.ERROR):
         @event_trigger("invalid_event_manager", "event_one")
         def example_function_invalid_event_manager(a, b):
@@ -137,9 +137,9 @@ def test_event_trigger_invalid_event_manager_logger(caplog):
 
 def test_event_trigger_invalid_event_name_type_logger(caplog):
     """
-    Test case 9: Invalid event name type, with logging
+    Test case 9: Invalid event name type, with logger provided
     """
-    # Test case 9: Invalid event name type, with logging
+    # Test case 9: Invalid event name type, with logger provided
     with caplog.at_level(logging.ERROR):
         @event_trigger(event_manager, 123)
         def example_function_invalid_event_name_type(a, b):
