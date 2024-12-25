@@ -1,4 +1,5 @@
-from typing import Callable, Any, Dict, List
+from typing import Callable, Any, Dict, List, Optional
+import logging
 
 class EventManager:
     """
@@ -56,7 +57,7 @@ class EventManager:
             for callback in self.events[event_name]:
                 callback(*args, **kwargs)
 
-def event_trigger(event_manager: EventManager, event_name: str) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+def event_trigger(event_manager: EventManager, event_name: str, logger: Optional[logging.Logger] = None ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """
     A decorator to trigger an event before executing the decorated function.
 
@@ -77,11 +78,23 @@ def event_trigger(event_manager: EventManager, event_name: str) -> Callable[[Cal
     TypeError
         If any of the parameters do not match the expected types.
     """
+    def log_or_raise_error(message: str):
+        """
+        Helper function to log an error or raise an exception.
+        """
+        if logger:
+            logger.error(message)
+        else:
+            raise TypeError(message)
+    
+    if not isinstance(logger, logging.Logger) and logger is not None:
+        raise TypeError("logger must be an instance of logging.Logger or None")
+    
     if not isinstance(event_manager, EventManager) or not event_manager:
-        raise TypeError("event_manager be a non-empty instance of EventManager")
+        log_or_raise_error("event_manager must be an instance of EventManager")
 
     if not isinstance(event_name, str) or not event_name:
-        raise TypeError("event_name must be a non-empty string")
+        log_or_raise_error("event_name must be a non-empty string")
 
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         """

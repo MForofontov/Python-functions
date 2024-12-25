@@ -1,5 +1,14 @@
 import pytest
+import logging
 from decorators.event_trigger import EventManager, event_trigger
+
+# Configure test_logger
+test_logger = logging.getLogger('test_logger')
+test_logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+test_logger.addHandler(handler)
 
 # Initialize the EventManager
 event_manager = EventManager()
@@ -95,13 +104,15 @@ def test_event_trigger_invalid_event_manager():
         def example_function_invalid_event_manager(a, b):
             return f"Result: {a + b}"
 
-def test_event_trigger_no_event_name():
+def test_event_trigger_no_event_name_with_çpgger(caplog):
     """
-    Test case 6: No event name provided
+    Test case 6: No event name provided with logger
     """
-    # Test case 6: No event name provided
-    with pytest.raises(TypeError, match="event_name must be a non-empty string"):
+    # Test case 6: No event name provided with logger
+    with caplog.at_level(logging.ERROR):
         @event_trigger(event_manager, "")
         def example_function_no_event_name(a, b):
             return f"Result: {a + b}"
+    
+    assert "event_name must be a non-empty string" in caplog.text
 
