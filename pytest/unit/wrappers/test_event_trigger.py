@@ -126,9 +126,9 @@ def test_event_trigger_invalid_logger():
 
 def test_event_trigger_invalid_event_manager_logger(caplog):
     """
-    Test case 8: Invalid event manager type (with logging)
+    Test case 8: Invalid event manager type, with logging
     """
-    # Test case 8: Invalid event manager type (with logging)
+    # Test case 8: Invalid event manager type, with logging
     with caplog.at_level(logging.ERROR):
         @event_trigger("invalid_event_manager", "event_one")
         def example_function_invalid_event_manager(a, b):
@@ -137,9 +137,9 @@ def test_event_trigger_invalid_event_manager_logger(caplog):
 
 def test_event_trigger_invalid_event_name_type_logger(caplog):
     """
-    Test case 9: Invalid event name type (with logging)
+    Test case 9: Invalid event name type, with logging
     """
-    # Test case 9: Invalid event name type (with logging)
+    # Test case 9: Invalid event name type, with logging
     with caplog.at_level(logging.ERROR):
         @event_trigger(event_manager, 123)
         def example_function_invalid_event_name_type(a, b):
