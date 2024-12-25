@@ -27,6 +27,11 @@ def env_config(var_name: str, logger: Optional[logging.Logger] = None,
     -------
     Callable[[Callable[..., Any]], Callable[..., Any]]
         The decorator function.
+
+    Raises
+    ------
+    TypeError
+        If any of the parameters do not match the expected types.
     """
     if not isinstance(var_name, str):
         raise TypeError("var_name must be a non-empty string")

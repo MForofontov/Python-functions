@@ -71,6 +71,11 @@ def event_trigger(event_manager: EventManager, event_name: str) -> Callable[[Cal
     -------
     Callable[[Callable[..., Any]], Callable[..., Any]]
         The decorator function.
+
+    Raises
+    ------
+    TypeError
+        If any of the parameters do not match the expected types.
     """
     if not isinstance(event_manager, EventManager) or not event_manager:
         raise TypeError("event_manager be a non-empty instance of EventManager")
