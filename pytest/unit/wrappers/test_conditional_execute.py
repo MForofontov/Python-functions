@@ -1,93 +1,113 @@
 import pytest
 from decorators.conditional_execute import conditional_execute
 
-# Predicate functions
-def always_true() -> bool:
-    """
-    Predicate function that always returns True.
-    
-    Returns
-    -------
-    bool
-        Always returns True.
-    """
+# Example predicate functions
+def always_true():
     return True
 
-def always_false() -> bool:
-    """
-    Predicate function that always returns False.
-    
-    Returns
-    -------
-    bool
-        Always returns False.
-    """
+def always_false():
     return False
 
+def condition_based_on_args(a, b):
+    return a > b
+
+# Example functions to be decorated
 @conditional_execute(always_true)
-def add(x: int, y: int) -> int:
-    """
-    Function that adds two integers.
-    """
-    return x + y
+def example_function_true(a, b):
+    return f"Result: {a + b}"
 
 @conditional_execute(always_false)
-def multiply(x: int, y: int) -> int:
-    """
-    Function that multiplies two integers.
-    """
-    return x * y
+def example_function_false(a, b):
+    return f"Result: {a + b}"
 
-@conditional_execute(always_true)
-def greet_true(greeting: str, name: str = "world") -> str:
-    """
-    Function that returns a greeting message with a true predicate.
-    """
-    return f"{greeting}, {name}!"
+@conditional_execute(lambda: condition_based_on_args(3, 2))
+def example_function_conditional(a, b):
+    return f"Result: {a + b}"
 
-@conditional_execute(always_false)
-def greet_false(greeting: str, name: str = "world") -> str:
+def test_conditional_execute_always_true():
     """
-    Function that returns a greeting message with a false predicate.
+    Test case 1: Predicate always true
     """
-    return f"{greeting}, {name}!"
+    # Test case 1: Predicate always true
+    result = example_function_true(1, 2)
+    assert result == "Result: 3"
 
-def test_conditional_execute_add():
+def test_conditional_execute_always_false():
     """
-    Test the conditional_execute decorator with the add function.
+    Test case 2: Predicate always false
     """
-    # Test case 1: Predicate returns True
-    assert add(1, 2) == 3
+    # Test case 2: Predicate always false
+    result = example_function_false(1, 2)
+    assert result is None
 
-def test_conditional_execute_multiply():
+def test_conditional_execute_condition_met():
     """
-    Test the conditional_execute decorator with the multiply function.
+    Test case 3: Predicate condition met
     """
-    # Test case 2: Predicate returns False
-    assert multiply(2, 3) is None
+    # Test case 3: Predicate condition met
+    result = example_function_conditional(1, 2)
+    assert result == "Result: 3"
+
+def test_conditional_execute_condition_not_met():
+    """
+    Test case 4: Predicate condition not met
+    """
+    # Test case 4: Predicate condition not met
+    @conditional_execute(lambda: condition_based_on_args(1, 2))
+    def example_function_conditional_not_met(a, b):
+        return f"Result: {a + b}"
+    
+    result = example_function_conditional_not_met(1, 2)
+    assert result is None
 
 def test_conditional_execute_with_kwargs():
     """
-    Test the conditional_execute decorator with keyword arguments.
+    Test case 5: Predicate with keyword arguments
     """
-    # Test case 3: Keyword arguments with true predicate
-    assert greet_true("Hello") == "Hello, world!"
-    assert greet_true("Hello", name="Alice") == "Hello, Alice!"
-
-def test_conditional_execute_with_false_predicate_and_kwargs():
-    """
-    Test the conditional_execute decorator with a false predicate and keyword arguments.
-    """
-    # Test case 4: Keyword arguments with false predicate
-    assert greet_false("Hello") is None
-    assert greet_false("Hello", name="Alice") is None
+    # Test case 5: Predicate with keyword arguments
+    @conditional_execute(always_true)
+    def example_function_kwargs(a, b=0):
+        return f"Result: {a + b}"
+    
+    result = example_function_kwargs(a=3, b=2)
+    assert result == "Result: 5"
+    
+    result = example_function_kwargs(a=1, b=2)
+    assert result == "Result: 3"
 
 def test_conditional_execute_invalid_predicate():
     """
-    Test the conditional_execute decorator with an invalid predicate.
+    Test case 6: Invalid predicate (not callable)
     """
-    # Test case 5: Invalid predicate
+    # Test case 6: Invalid predicate (not callable)
     with pytest.raises(TypeError, match="Predicate must be callable"):
         @conditional_execute("not a callable")
-        def invalid_func(x: int) -> int:
-            return x
+        def example_function_invalid(a, b):
+            return f"Result: {a + b}"
+
+def test_conditional_execute_no_args():
+    """
+    Test case 7: Function with no arguments
+    """
+    # Test case 7: Function with no arguments
+    @conditional_execute(always_true)
+    def example_function_no_args():
+        return "Original result"
+    
+    result = example_function_no_args()
+    assert result == "Original result"
+
+def test_conditional_execute_with_default_args():
+    """
+    Test case 8: Function with default arguments
+    """
+    # Test case 8: Function with default arguments
+    @conditional_execute(always_true)
+    def example_function_default_args(a, b=0):
+        return f"Result: {a + b}"
+    
+    result = example_function_default_args(3)
+    assert result == "Result: 3"
+    
+    result = example_function_default_args(1, 2)
+    assert result == "Result: 3"
