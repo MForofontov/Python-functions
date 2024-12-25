@@ -83,7 +83,7 @@ def event_trigger(event_manager: EventManager, event_name: str, logger: Optional
         Helper function to log an error or raise an exception.
         """
         if logger:
-            logger.error(message)
+            logger.error(message, exc_info=True)
         else:
             raise TypeError(message)
     

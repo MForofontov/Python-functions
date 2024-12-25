@@ -38,7 +38,7 @@ def env_config(var_name: str, logger: Optional[logging.Logger] = None,
         Helper function to log an error or raise an exception.
         """
         if logger:
-            logger.error(message)
+            logger.error(message, exc_info=True)
         else:
             raise TypeError(message)
 
