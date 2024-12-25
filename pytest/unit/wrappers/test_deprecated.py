@@ -94,3 +94,13 @@ def test_deprecated_with_exception(caplog):
         with pytest.raises(ValueError, match="An error occurred"):
             old_function_with_exception()
     assert "Call to deprecated function old_function_with_exception." in caplog.text
+
+def test_invalid_logger_type():
+    """
+    Test case 7: Invalid logger type
+    """
+    # Test case 7: Invalid logger type
+    with pytest.raises(TypeError, match="logger must be an instance of logging.Logger or None"):
+        @deprecated(logger="invalid_logger")
+        def invalid_logger_type():
+            return "Invalid logger type"
