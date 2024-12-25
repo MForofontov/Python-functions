@@ -1,5 +1,5 @@
 import pytest
-from conditional_return import conditional_return
+from decorators.conditional_return import conditional_return
 
 # Example condition functions
 def always_true(*args, **kwargs):
