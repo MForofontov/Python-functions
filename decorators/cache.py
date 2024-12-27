@@ -13,7 +13,15 @@ def cache(func: Callable[..., Any]) -> Callable[..., Any]:
     -------
     Callable[..., Any]
         A wrapper function that caches the results of the input function.
+
+    Raises
+    ------
+    TypeError
+        If the input function is not callable or if the arguments are unhashable.
     """
+    if not callable(func):
+        raise TypeError("func must be callable")
+
     cached_results: Dict[Tuple[Tuple[Any, ...], FrozenSet[Tuple[str, Any]]], Any] = {}
 
     def wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -31,10 +39,18 @@ def cache(func: Callable[..., Any]) -> Callable[..., Any]:
         -------
         Any
             The cached result of the wrapped function.
-        """
-        # Create a key based on the function arguments
-        key: Tuple[Tuple[Any, ...], FrozenSet[Tuple[str, Any]]] = (args, frozenset(kwargs.items()))
         
+        Raises
+        ------
+        TypeError
+            If the arguments are unhashable.
+        """
+        try:
+            # Create a key based on the function arguments
+            key: Tuple[Tuple[Any, ...], FrozenSet[Tuple[str, Any]]] = (args, frozenset(kwargs.items()))
+        except TypeError as e:
+            raise TypeError(f"Unhashable arguments: {e}")
+
         # Check if the result is already cached
         if key not in cached_results:
             # If not cached, call the function and store the result
