@@ -114,3 +114,37 @@ def test_cache_concat_different_mixed_args():
     assert concat('x', 'y', z='z', w='w') == 'xyzw'  # Different arguments, should not use cache
     assert call_counts['concat'] == 2  # Function should be called twice
     call_counts['concat'] = 0
+
+def test_cache_uncallable_function():
+    """
+    Test case 10: Uncallable function
+    """
+    # Test case 10: Uncallable function
+    with pytest.raises(TypeError, match="func must be callable"):
+        @cache
+        def example_function_uncallable(a, b):
+            return a + b
+
+def test_cache_with_unhashable_args():
+    """
+    Test case 11: Function with unhashable arguments
+    """
+    # Test case 11: Function with unhashable arguments
+    @cache
+    def example_function_unhashable(a):
+        return sum(a)
+    
+    with pytest.raises(TypeError, match="Unhashable arguments"):
+        example_function_unhashable([1, 2, 3, {}])  # Lists with dictionaries are unhashable
+
+def test_cache_with_exception():
+    """
+    Test case 12: Function that raises an exception
+    """
+    # Test case 12: Function that raises an exception
+    @cache
+    def example_function_exception(a, b):
+        raise ValueError("An error occurred")
+    
+    with pytest.raises(ValueError, match="An error occurred"):
+        example_function_exception(1, 2)

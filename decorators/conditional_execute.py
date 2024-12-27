@@ -53,9 +53,17 @@ def conditional_execute(predicate: Callable[[], bool]) -> Callable[[Callable[...
             -------
             Optional[T]
                 The result of the wrapped function if the predicate returns True, otherwise None.
+            
+            Raises
+            ------
+            RuntimeError
+                If the predicate function raises an error.
             """
-            if predicate():
-                return func(*args, **kwargs)
+            try:
+                if predicate():
+                    return func(*args, **kwargs)
+            except Exception as e:
+                raise RuntimeError(f"Predicate function raised an error: {e}")
             return None
         
         return wrapper
