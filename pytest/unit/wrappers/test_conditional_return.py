@@ -1,5 +1,5 @@
 import pytest
-from decorators.conditional_return import conditional_return
+from conditional_return import conditional_return
 
 # Example condition functions
 def always_true(*args, **kwargs):
@@ -158,3 +158,13 @@ def test_conditional_return_condition_raises_exception():
     # Test case 12: Condition raises an exception
     with pytest.raises(RuntimeError, match="Condition function raised an error: Condition raised an exception"):
         example_function_raises_exception(1, 2)
+
+def test_conditional_return_invalid_condition():
+    """
+    Test case 13: Invalid condition (not callable)
+    """
+    # Test case 13: Invalid condition (not callable)
+    with pytest.raises(TypeError, match="Condition must be callable"):
+        @conditional_return("not a callable", "Condition met")
+        def example_function_invalid(a, b):
+            return f"Result: {a + b}"
