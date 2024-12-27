@@ -55,6 +55,11 @@ def conditional_return(condition: Callable[..., bool], return_value: T) -> Calla
             -------
             T
                 The specified return value if the condition is met, otherwise the result of the wrapped function.
+            
+            Raises
+            ------
+            RuntimeError
+                If the condition function raises an error.
             """
             try:
                 if condition(*args, **kwargs):
