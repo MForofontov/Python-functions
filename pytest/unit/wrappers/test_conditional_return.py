@@ -1,11 +1,11 @@
 import pytest
-from conditional_return import conditional_return
+from decorators.conditional_return import conditional_return
 
 # Example condition functions
-def always_true(*args, **kwargs):
+def always_true():
     return True
 
-def always_false(*args, **kwargs):
+def always_false():
     return False
 
 def condition_based_on_args(a, b):
