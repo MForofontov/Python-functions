@@ -22,6 +22,9 @@ def handle_error(error_message: str, logger: Optional[logging.Logger] = None) ->
     ------
     None
     """
+    if isinstance(logger, logging.Logger) and logger is not None:
+        raise TypeError("logger must be an instance of logging.Logger or None")
+
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         """
         The actual decorator function.
