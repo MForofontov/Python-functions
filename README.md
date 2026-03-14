@@ -225,7 +225,7 @@ MIT License - see LICENSE file for details.
 
 ## 👤 Author
 
-**MForofontov**
+**Mykyta Forofontov**
 - GitHub: [@MForofontov](https://github.com/MForofontov)
 
 ## 🔗 Links
